@@ -13,13 +13,16 @@ class HomePageView(TemplateView):
             is_active=True,
             date__gte=timezone.now()
         ).order_by('date').only('id', 'title', 'description', 'poster', 'date', 'venue')
-        
+
         context['featured_event'] = events.first()
-        context['upcoming_events'] = events[1:4] if events.count() > 1 else []
-        
+
+        # Show all upcoming events starting from today in the upcoming events section
+        # As per user request, it's okay if the featured event appears twice
+        context['upcoming_events'] = list(events)
+
         # Fetch active social posts
         context['social_posts'] = SocialPost.objects.filter(
             is_active=True
         ).order_by('-created_at')[:6].only('id', 'platform', 'url', 'caption', 'created_at')
-        
+
         return context
