@@ -1,79 +1,149 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section text-center">
+<section class="hero-section d-flex align-items-center text-center text-lg-start">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-4">Mkenya Isaak 7Million</h1>
-        <p class="lead mb-5">Your Digital Stage. Your Community. Your Events.</p>
-        {% if upcoming_events %}
-            <div class="card bg-dark text-white d-inline-block p-4 border-warning border-2">
-                <h2 class="h4 text-warning">Next Show</h2>
-                <p class="h2 fw-bold">{{ upcoming_events.0.title }}</p>
-                <p class="mb-3">{{ upcoming_events.0.date|date:"F j, Y @ g:i A" }}</p>
-                <a href="{% url 'events:event_detail' upcoming_events.0.id %}" class="btn btn-warning btn-lg fw-bold">Get Tickets</a>
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="hero-title animate-fade-up">
+                    Laugh. Live. <span class="text-warning">Love.</span>
+                </h1>
+                <p class="hero-subtitle animate-fade-up animate-delay-1">
+                    The official home of <strong>Mkenya Isaak 7Million</strong>. Join the community, book tickets, and catch the latest vibes.
+                </p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start animate-fade-up animate-delay-2">
+                    <a href="#upcoming-events" class="btn btn-light btn-lg px-4 fw-bold text-primary shadow-sm">
+                        <i class="bi bi-ticket-perforated me-2"></i>Get Tickets
+                    </a>
+                    <a href="https://web.facebook.com/seven7miIlion/" target="_blank" class="btn btn-outline-light btn-lg px-4 fw-bold">
+                        <i class="fab fa-facebook me-2"></i>Join Community
+                    </a>
+                </div>
             </div>
-        {% else %}
-            <p class="lead">Stay tuned for upcoming events!</p>
-        {% endif %}
+            <div class="col-lg-6 text-center animate-fade-up animate-delay-2">
+                <!-- Placeholder for a hero image or dynamic content -->
+                <div class="bg-white p-2 rounded-circle shadow-lg d-inline-block" style="width: 300px; height: 300px; overflow: hidden;">
+                    <img src="https://via.placeholder.com/300x300/0d6efd/ffffff?text=Mkenya+Isaak" alt="Mkenya Isaak" class="img-fluid rounded-circle">
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
+<!-- Featured Event Section -->
+{% if featured_event %}
+<section class="featured-section py-5 position-relative text-white" style="background: url('/media/background_pattern.jpg') center/cover no-repeat;">
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-75"></div>
+    <div class="container position-relative z-1">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0 text-center">
+                {% if featured_event.poster %}
+                    <img src="{{ featured_event.poster.url }}" class="img-fluid rounded-3 shadow-lg border border-4 border-warning" alt="{{ featured_event.title }}" style="max-height: 500px;">
+                {% endif %}
+            </div>
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-danger fs-6 me-3 animate-pulse">NEXT BIG SHOW</span>
+                    <h4 class="text-warning mb-0 fw-bold">{{ featured_event.date|date:"l, F jS" }}</h4>
+                </div>
+                <h2 class="display-4 fw-bold mb-4">{{ featured_event.title }}</h2>
+                
+                <div class="d-flex align-items-center mb-4 bg-white bg-opacity-10 p-3 rounded-3">
+                    <img src="/media/mkenya_isaak_face.jpg" alt="Mkenya Isaak" class="rounded-circle border border-2 border-white me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                    <div>
+                        <p class="mb-0 small text-uppercase text-warning fw-bold">Starring</p>
+                        <h5 class="mb-0">Mkenya Isaak 7Million</h5>
+                    </div>
+                </div>
+
+                <p class="lead mb-4"><i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ featured_event.venue }}</p>
+                
+                <div class="d-flex gap-3">
+                    <a href="{% url 'events:event_detail' featured_event.id %}" class="btn btn-warning btn-lg fw-bold px-5">
+                        Get Tickets Now
+                    </a>
+                    <a href="{% url 'events:event_detail' featured_event.id %}" class="btn btn-outline-light btn-lg">
+                        More Info
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Social Feed Section -->
-<section class="py-5">
+<section class="py-5 bg-light">
     <div class="container">
-        <h2 class="text-center mb-4 fw-bold">Latest Vibes</h2>
-        <div class="social-feed-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-primary"><i class="bi bi-phone-vibrate me-2"></i>Latest Vibes</h2>
+            <a href="https://www.tiktok.com/@mkenyaisaak" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        
+        <div class="d-flex overflow-auto social-scroll-container pb-3">
             {% for post in social_posts %}
-                <div class="social-card">
+                <div class="social-card bg-white">
                     {% if post.platform == 'TIKTOK' %}
-                        <blockquote class="tiktok-embed" cite="{{ post.url }}" data-video-id="{{ post.url|slice:'-19:' }}" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@mkenyaisaak" href="https://www.tiktok.com/@mkenyaisaak">@mkenyaisaak</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
+                        <blockquote class="tiktok-embed m-0" cite="{{ post.url }}" data-video-id="{{ post.url|slice:'-19:' }}" style="max-width: 325px; min-width: 325px;">
+                            <section> <a target="_blank" href="{{ post.url }}">{{ post.caption|truncatechars:50 }}</a> </section>
+                        </blockquote>
+                        <script async src="https://www.tiktok.com/embed.js"></script>
                     {% elif post.platform == 'INSTAGRAM' %}
-                        <iframe src="{{ post.url }}embed" width="300" height="400" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
-                    {% else %}
-                         <div class="p-3">
-                            <p class="text-muted">Content from {{ post.get_platform_display }}</p>
-                            <a href="{{ post.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Post</a>
-                         </div>
+                        <iframe src="{{ post.url }}embed" width="320" height="400" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
                     {% endif %}
                 </div>
             {% empty %}
-                <p class="text-center text-muted">No posts yet. Check back soon!</p>
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Stay tuned! Fresh content coming soon.</p>
+                </div>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<!-- Upcoming Events List -->
-<section class="py-5 bg-white">
+<!-- Upcoming Events Section -->
+<section id="upcoming-events" class="py-5">
     <div class="container">
-        <h2 class="text-center mb-5 fw-bold">Upcoming Events</h2>
+        <div class="text-center mb-5">
+            <h2 class="fw-bold display-5">Upcoming Shows</h2>
+            <p class="text-muted lead">Don't miss out on the laughter.</p>
+        </div>
+
         <div class="row g-4">
             {% for event in upcoming_events %}
                 <div class="col-md-4">
-                    <div class="card h-100 event-card border-0 shadow-sm">
+                    <div class="card h-100 event-card shadow-sm">
                         {% if event.poster %}
-                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 300px; object-fit: cover;">
+                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover;">
                         {% else %}
-                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
-                                <span>No Poster</span>
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="bi bi-calendar-event fs-1"></i>
                             </div>
                         {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title fw-bold">{{ event.title }}</h5>
-                            <p class="card-text text-muted">
-                                <i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"M j, Y • g:i A" }}
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-danger rounded-pill">{{ event.date|date:"M d" }}</span>
+                                <small class="text-muted">{{ event.date|date:"g:i A" }}</small>
+                            </div>
+                            <h5 class="card-title fw-bold mb-1">{{ event.title }}</h5>
+                            <p class="card-text text-muted small mb-3">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ event.venue }}
                             </p>
-                            <p class="card-text text-muted">
-                                <i class="bi bi-geo-alt me-2"></i>{{ event.venue }}
-                            </p>
-                            <a href="{% url 'events:event_detail' event.id %}" class="btn btn-dark w-100">View Details</a>
+                            <a href="{% url 'events:event_detail' event.id %}" class="btn btn-primary w-100 rounded-pill">
+                                Get Tickets <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             {% empty %}
-                <div class="col-12 text-center">
-                    <p class="text-muted">No upcoming events scheduled.</p>
+                <div class="col-12 text-center py-5">
+                    <div class="display-1 text-muted mb-3"><i class="bi bi-calendar-x"></i></div>
+                    <h3>No upcoming shows right now.</h3>
+                    <p class="text-muted">Follow us on social media for updates!</p>
                 </div>
             {% endfor %}
         </div>
