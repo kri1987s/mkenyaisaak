@@ -21,6 +21,6 @@ class HomePageView(TemplateView):
         # Fetch active social posts
         context['social_posts'] = SocialPost.objects.filter(
             is_active=True
-        ).order_by('-created_at')[:10]
+        ).order_by('-created_at')[:6]
         
         return context
