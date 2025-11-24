@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-4">Mkenya Isaak 7Million</h1>
+        <p class="lead mb-5">Your Digital Stage. Your Community. Your Events.</p>
+        {% if upcoming_events %}
+            <div class="card bg-dark text-white d-inline-block p-4 border-warning border-2">
+                <h2 class="h4 text-warning">Next Show</h2>
+                <p class="h2 fw-bold">{{ upcoming_events.0.title }}</p>
+                <p class="mb-3">{{ upcoming_events.0.date|date:"F j, Y @ g:i A" }}</p>
+                <a href="{% url 'events:event_detail' upcoming_events.0.id %}" class="btn btn-warning btn-lg fw-bold">Get Tickets</a>
+            </div>
+        {% else %}
+            <p class="lead">Stay tuned for upcoming events!</p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Social Feed Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4 fw-bold">Latest Vibes</h2>
+        <div class="social-feed-container">
+            {% for post in social_posts %}
+                <div class="social-card">
+                    {% if post.platform == 'TIKTOK' %}
+                        <blockquote class="tiktok-embed" cite="{{ post.url }}" data-video-id="{{ post.url|slice:'-19:' }}" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@mkenyaisaak" href="https://www.tiktok.com/@mkenyaisaak">@mkenyaisaak</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
+                    {% elif post.platform == 'INSTAGRAM' %}
+                        <iframe src="{{ post.url }}embed" width="300" height="400" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+                    {% else %}
+                         <div class="p-3">
+                            <p class="text-muted">Content from {{ post.get_platform_display }}</p>
+                            <a href="{{ post.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Post</a>
+                         </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-center text-muted">No posts yet. Check back soon!</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events List -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Upcoming Events</h2>
+        <div class="row g-4">
+            {% for event in upcoming_events %}
+                <div class="col-md-4">
+                    <div class="card h-100 event-card border-0 shadow-sm">
+                        {% if event.poster %}
+                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 300px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                                <span>No Poster</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ event.title }}</h5>
+                            <p class="card-text text-muted">
+                                <i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"M j, Y • g:i A" }}
+                            </p>
+                            <p class="card-text text-muted">
+                                <i class="bi bi-geo-alt me-2"></i>{{ event.venue }}
+                            </p>
+                            <a href="{% url 'events:event_detail' event.id %}" class="btn btn-dark w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No upcoming events scheduled.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

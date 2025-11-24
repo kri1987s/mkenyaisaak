@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-5 fw-bold">All Events</h1>
+    <div class="row g-4">
+        {% for event in events %}
+            <div class="col-md-4">
+                <div class="card h-100 event-card border-0 shadow-sm">
+                    {% if event.poster %}
+                        <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 300px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <span>No Poster</span>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ event.title }}</h5>
+                        <p class="card-text text-muted">
+                            <i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"M j, Y • g:i A" }}
+                        </p>
+                        <p class="card-text text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>{{ event.venue }}
+                        </p>
+                        <a href="{% url 'events:event_detail' event.id %}" class="btn btn-dark w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No events found.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

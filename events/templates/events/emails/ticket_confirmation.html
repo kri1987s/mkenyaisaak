@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .ticket { border: 1px dashed #ccc; padding: 15px; margin-bottom: 15px; background: #f9f9f9; }
+        .footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Your Tickets are Ready!</h2>
+            <p>Thank you for booking with Mkenya Isaak 7Million.</p>
+        </div>
+        
+        <p>Hi {{ booking.customer_name }},</p>
+        <p>Here are your tickets for <strong>{{ booking.tickets.first.ticket_type.event.title }}</strong>.</p>
+        <p><strong>Date:</strong> {{ booking.tickets.first.ticket_type.event.date|date:"l, F j, Y @ g:i A" }}</p>
+        <p><strong>Venue:</strong> {{ booking.tickets.first.ticket_type.event.venue }}</p>
+
+        <h3>Your Tickets</h3>
+        {% for ticket in booking.tickets.all %}
+            <div class="ticket">
+                <p><strong>Type:</strong> {{ ticket.ticket_type.name }}</p>
+                <p><strong>Code:</strong> {{ ticket.ticket_code }}</p>
+                <!-- In a real email, you'd attach the QR code image or link to it -->
+                <p><em>Please present the attached QR code at the gate.</em></p>
+            </div>
+        {% endfor %}
+
+        <div class="footer">
+            <p>&copy; {% now "Y" %} Mkenya Isaak 7Million. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
