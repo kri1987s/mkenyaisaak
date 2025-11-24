@@ -9,11 +9,10 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Fetch upcoming active events
-        # Fetch upcoming active events
         events = Event.objects.filter(
             is_active=True,
             date__gte=timezone.now()
-        ).order_by('date')
+        ).order_by('date').only('id', 'title', 'description', 'poster', 'date', 'venue')
         
         context['featured_event'] = events.first()
         context['upcoming_events'] = events[1:4] if events.count() > 1 else []
@@ -21,6 +20,6 @@ class HomePageView(TemplateView):
         # Fetch active social posts
         context['social_posts'] = SocialPost.objects.filter(
             is_active=True
-        ).order_by('-created_at')[:6]
+        ).order_by('-created_at')[:6].only('id', 'platform', 'url', 'caption', 'created_at')
         
         return context

@@ -25,7 +25,7 @@
             <div class="col-lg-6 text-center animate-fade-up animate-delay-2">
                 <!-- Placeholder for a hero image or dynamic content -->
                 <div class="bg-white p-2 rounded-circle shadow-lg d-inline-block" style="width: 300px; height: 300px; overflow: hidden;">
-                    <img src="https://via.placeholder.com/300x300/0d6efd/ffffff?text=Mkenya+Isaak" alt="Mkenya Isaak" class="img-fluid rounded-circle">
+                    <img src="https://via.placeholder.com/300x300/0d6efd/ffffff?text=Mkenya+Isaak" alt="Mkenya Isaak" class="img-fluid rounded-circle" loading="lazy">
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
         <div class="row align-items-center">
             <div class="col-lg-5 mb-4 mb-lg-0 text-center">
                 {% if featured_event.poster %}
-                    <img src="{{ featured_event.poster.url }}" class="img-fluid rounded-3 shadow-lg border border-4 border-warning" alt="{{ featured_event.title }}" style="max-height: 500px;">
+                    <img src="{{ featured_event.poster.url }}" class="img-fluid rounded-3 shadow-lg border border-4 border-warning" alt="{{ featured_event.title }}" style="max-height: 500px;" loading="lazy">
                 {% endif %}
             </div>
             <div class="col-lg-7">
@@ -51,7 +51,7 @@
                 <h2 class="display-4 fw-bold mb-4">{{ featured_event.title }}</h2>
                 
                 <div class="d-flex align-items-center mb-4 bg-white bg-opacity-10 p-3 rounded-3">
-                    <img src="/media/mkenya_isaak_face.jpg" alt="Mkenya Isaak" class="rounded-circle border border-2 border-white me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <img src="/media/mkenya_isaak_face.jpg" alt="Mkenya Isaak" class="rounded-circle border border-2 border-white me-3" style="width: 80px; height: 80px; object-fit: cover;" loading="lazy">
                     <div>
                         <p class="mb-0 small text-uppercase text-warning fw-bold">Starring</p>
                         <h5 class="mb-0">Mkenya Isaak 7Million</h5>
@@ -101,6 +101,7 @@
                     <p class="text-muted">Stay tuned! Fresh content coming soon.</p>
                 </div>
             {% endfor %}
+            <script async src="https://www.tiktok.com/embed.js"></script>
         </div>
     </div>
 </section>
@@ -118,7 +119,7 @@
                 <div class="col-md-4">
                     <div class="card h-100 event-card shadow-sm">
                         {% if event.poster %}
-                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover;">
+                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover;" loading="lazy">
                         {% else %}
                             <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
                                 <i class="bi bi-calendar-event fs-1"></i>
