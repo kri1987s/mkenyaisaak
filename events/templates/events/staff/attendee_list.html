@@ -1,0 +1,76 @@
+{% extends 'staff_base.html' %}
+
+{% block extra_css %}
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Attendees: {{ event.title }}</h1>
+        <a href="{% url 'events:staff_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div id="attendees-table"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var table = new Tabulator("#attendees-table", {
+            ajaxURL: "{% url 'events:api_attendees' event.id %}",
+            layout: "fitColumns",
+            pagination: "local",
+            paginationSize: 20,
+            columns: [
+                {title: "Ticket Code", field: "ticket_code", headerFilter: "input"},
+                {title: "Name", field: "customer_name", headerFilter: "input"},
+                {title: "Phone", field: "customer_phone", headerFilter: "input"},
+                {title: "Type", field: "ticket_type", headerFilter: "select", headerFilterParams: {values: true}},
+                {title: "Payment", field: "payment_status", formatter: function(cell) {
+                    var val = cell.getValue();
+                    var color = val === 'PAID' ? 'success' : 'warning';
+                    return `<span class="badge bg-${color}">${val}</span>`;
+                }},
+                {title: "Gate 1", field: "gate1", formatter: "tickCross", editor: true, cellEdited: updateStatus},
+                {title: "Gate 2", field: "gate2", formatter: "tickCross", editor: true, cellEdited: updateStatus},
+            ],
+        });
+
+        function updateStatus(cell) {
+            var data = cell.getRow().getData();
+            var field = cell.getField();
+            var value = cell.getValue();
+
+            fetch("{% url 'events:api_update_ticket' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: data.id,
+                    field: field,
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status !== 'success') {
+                    alert('Error updating status');
+                    cell.restoreOldValue();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                cell.restoreOldValue();
+            });
+        }
+    });
+</script>
+{% endblock %}

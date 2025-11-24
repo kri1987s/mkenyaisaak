@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Staff Portal - Mkenya Isaak{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        body { background-color: #f0f2f5; }
+        .sidebar { min-height: 100vh; background-color: #212529; color: white; }
+        .nav-link { color: rgba(255,255,255,0.8); }
+        .nav-link:hover, .nav-link.active { color: #ffc107; }
+        .content-wrapper { padding: 20px; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar p-3 d-none d-md-block" style="width: 250px;">
+            <h4 class="mb-4 text-warning">Staff Portal</h4>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'events:staff_dashboard' %}" class="nav-link">
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'events:staff_scanner' %}" class="nav-link">
+                        <i class="bi bi-qr-code-scan me-2"></i>Scanner
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a href="{% url 'core:home' %}" class="nav-link">
+                        <i class="bi bi-box-arrow-left me-2"></i>Back to Site
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Mobile Header -->
+        <div class="flex-grow-1">
+            <nav class="navbar navbar-dark bg-dark d-md-none p-3">
+                <span class="navbar-brand">Staff Portal</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mobileNav">
+                    <ul class="navbar-nav mt-3">
+                        <li class="nav-item"><a href="{% url 'events:staff_dashboard' %}" class="nav-link">Dashboard</a></li>
+                        <li class="nav-item"><a href="{% url 'events:staff_scanner' %}" class="nav-link">Scanner</a></li>
+                        <li class="nav-item"><a href="{% url 'core:home' %}" class="nav-link">Back to Site</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

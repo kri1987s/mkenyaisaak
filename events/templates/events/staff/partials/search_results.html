@@ -1,0 +1,42 @@
+{% if tickets %}
+    <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Event</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.ticket_code }}</td>
+                    <td>{{ ticket.booking.customer_name }}</td>
+                    <td>{{ ticket.booking.customer_phone }}</td>
+                    <td>{{ ticket.ticket_type.event.title }}</td>
+                    <td>{{ ticket.ticket_type.name }}</td>
+                    <td>
+                        {% if ticket.booking.payment_status == 'PAID' %}
+                            <span class="badge bg-success">Paid</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'events:staff_resend_email' ticket.id %}" class="btn btn-sm btn-info" onclick="return confirm('Resend ticket email to {{ ticket.booking.customer_email }}?')">
+                            <i class="bi bi-envelope me-1"></i>Resend Email
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-center text-muted">No tickets found.</p>
+{% endif %}

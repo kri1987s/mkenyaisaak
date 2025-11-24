@@ -1,0 +1,51 @@
+{% extends 'staff_base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Staff Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Active Events</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ events.count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-event fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h4 mb-3">Active Events</h2>
+    <div class="row">
+        {% for event in events %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ event.title }}</h5>
+                        <p class="card-text text-muted">{{ event.date|date:"M j, Y @ g:i A" }}</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'events:staff_attendees' event.id %}" class="btn btn-primary">
+                                <i class="bi bi-people me-2"></i>View Attendees
+                            </a>
+                            <a href="#" class="btn btn-outline-dark">
+                                <i class="bi bi-pencil me-2"></i>Edit Event
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No active events found.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
