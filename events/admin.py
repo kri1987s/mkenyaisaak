@@ -11,6 +11,18 @@ class EventAdmin(admin.ModelAdmin):
     inlines = [TicketTypeInline]
     search_fields = ('title', 'venue')
     list_filter = ('is_active', 'date')
+    fieldsets = (
+        ('Event Information', {
+            'fields': ('title', 'description', 'poster', 'date', 'venue', 'is_active')
+        }),
+        ('Payment Details', {
+            'fields': ('payment_till_number', 'payment_account_number', 'payment_instructions'),
+            'description': 'Offline payment details for this event'
+        }),
+        ('Marketing', {
+            'fields': ('marketing_qr_code',)
+        }),
+    )
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

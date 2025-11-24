@@ -35,6 +35,19 @@
                     {% endfor %}
                 </ul>
                 <a href="{% url 'events:booking_create' event.id %}" class="btn btn-warning btn-lg w-100 fw-bold">Book Now</a>
+
+                <!-- Payment information -->
+                {% if event.payment_till_number or event.payment_account_number %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h4 class="h5 fw-bold mb-2">Payment Options</h4>
+                        {% if event.payment_till_number %}
+                            <p class="mb-1"><i class="bi bi-cash-coin text-success me-2"></i><strong>Till Number:</strong> {{ event.payment_till_number }}</p>
+                        {% endif %}
+                        {% if event.payment_account_number %}
+                            <p class="mb-1"><i class="bi bi-bank text-info me-2"></i><strong>Bank Account:</strong> {{ event.payment_account_number }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

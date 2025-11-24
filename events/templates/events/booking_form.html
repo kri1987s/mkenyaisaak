@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-dark text-white py-3">
                     <h2 class="h4 mb-0">Book Tickets: {{ event.title }}</h2>
@@ -11,45 +11,82 @@
                 <div class="card-body p-4">
                     <form method="post">
                         {% csrf_token %}
-                        
-                        <h4 class="mb-3">Your Details</h4>
-                        <div class="mb-3">
-                            <label for="{{ form.customer_name.id_for_label }}" class="form-label">Full Name</label>
-                            {{ form.customer_name }}
-                            {{ form.customer_name.errors }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.customer_email.id_for_label }}" class="form-label">Email Address</label>
-                            {{ form.customer_email }}
-                            {{ form.customer_email.errors }}
+
+                        <h4 class="mb-3">Your Contact Details</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.customer_name.id_for_label }}" class="form-label">Full Name (Optional)</label>
+                                {{ form.customer_name }}
+                                {{ form.customer_name.errors }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.customer_email.id_for_label }}" class="form-label">Email Address (Optional)</label>
+                                {{ form.customer_email }}
+                                {{ form.customer_email.errors }}
+                            </div>
                         </div>
                         <div class="mb-4">
-                            <label for="{{ form.customer_phone.id_for_label }}" class="form-label">Phone Number</label>
+                            <label for="{{ form.customer_phone.id_for_label }}" class="form-label">Phone Number (Required)</label>
                             {{ form.customer_phone }}
                             {{ form.customer_phone.errors }}
                         </div>
 
                         <h4 class="mb-3">Select Tickets</h4>
-                        {% for field in form %}
-                            {% if field.name|slice:":7" == "ticket_" %}
-                                <div class="mb-3 row align-items-center">
-                                    <label for="{{ field.id_for_label }}" class="col-sm-8 col-form-label">{{ field.label }}</label>
-                                    <div class="col-sm-4">
-                                        {{ field }}
+                        <div class="row g-3 mb-4">
+                            {% for field in form %}
+                                {% if field.name|slice:":7" == "ticket_" %}
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card h-100 border border-1 ticket-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ field.label|slice:":15" }}</h5>
+                                                <p class="card-text">
+                                                    <span class="price-display">KES 0.00</span>
+                                                </p>
+                                                <div class="input-group">
+                                                    <button class="btn btn-outline-secondary minus-btn" type="button" data-field="{{ field.name }}">-</button>
+                                                    {{ field }}
+                                                    <button class="btn btn-outline-secondary plus-btn" type="button" data-field="{{ field.name }}">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    {{ field.errors }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                        
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Total calculation -->
+                        <div class="border-top pt-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>Total:</h5>
+                                <h5 id="total-amount">KES 0.00</h5>
+                            </div>
+                        </div>
+
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
                                 {{ form.non_field_errors }}
                             </div>
                         {% endif %}
 
+                        <!-- Payment instructions -->
+                        {% if event.payment_till_number or event.payment_instructions %}
+                            <div class="alert alert-info mb-4">
+                                <h5><i class="bi bi-credit-card me-2"></i>Payment Instructions</h5>
+                                {% if event.payment_till_number %}
+                                    <p><strong>Pay to Till Number: {{ event.payment_till_number }}</strong></p>
+                                {% endif %}
+                                {% if event.payment_account_number %}
+                                    <p><strong>Or Bank Account: {{ event.payment_account_number }}</strong></p>
+                                {% endif %}
+                                {% if event.payment_instructions %}
+                                    <p>{{ event.payment_instructions|linebreaks }}</p>
+                                {% endif %}
+                                <p class="text-warning">After payment, please save your transaction ID for confirmation.</p>
+                            </div>
+                        {% endif %}
+
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold">Proceed to Payment</button>
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold">Complete Booking</button>
                             <a href="{% url 'events:event_detail' event.id %}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
@@ -58,4 +95,90 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Extract price from the label text for each ticket type
+    function extractPriceFromLabel(labelText) {
+        // Extract price from label text like "Regular (KES 1000.00)" -> "1000.00"
+        const match = labelText.match(/KES\s*([\d.]+)/i);
+        return match ? parseFloat(match[1]) : 0;
+    }
+
+    // Update total amount when ticket quantities change
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('[id^=id_ticket_]').forEach(function(field) {
+            // Extract price by looking at the associated label
+            const labelElement = document.querySelector(`label[for="${field.id}"]`);
+            let price = 0;
+            if (labelElement) {
+                price = extractPriceFromLabel(labelElement.textContent);
+            } else {
+                // Fallback: try to get from data attribute using different approach
+                const dataPrice = field.getAttribute('data-ticket-price');
+                price = dataPrice ? parseFloat(dataPrice) : 0;
+            }
+
+            // Update price display for this ticket type
+            const card = field.closest('.ticket-card');
+            if (card) {
+                const priceDisplay = card.querySelector('.price-display');
+                if (priceDisplay) {
+                    priceDisplay.textContent = `KES ${price.toFixed(2)}`;
+                }
+            }
+
+            const quantity = parseInt(field.value) || 0;
+            total += price * quantity;
+        });
+        document.getElementById('total-amount').textContent = 'KES ' + total.toFixed(2);
+    }
+
+    // Add event listeners for quantity inputs
+    document.querySelectorAll('[id^=id_ticket_]').forEach(function(field) {
+        field.addEventListener('input', updateTotal);
+    });
+
+    // Minus button functionality
+    document.querySelectorAll('.minus-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const fieldId = this.getAttribute('data-field');
+            const field = document.getElementById('id_' + fieldId);
+            let value = parseInt(field.value) || 0;
+            if (value > 0) {
+                field.value = value - 1;
+                updateTotal();
+            }
+        });
+    });
+
+    // Plus button functionality
+    document.querySelectorAll('.plus-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const fieldId = this.getAttribute('data-field');
+            const field = document.getElementById('id_' + fieldId);
+            const maxValue = parseInt(field.getAttribute('max')) || 10;
+            let value = parseInt(field.value) || 0;
+            if (value < maxValue) {
+                field.value = value + 1;
+                updateTotal();
+            }
+        });
+    });
+
+    // Initialize total on page load
+    updateTotal();
+});
+</script>
+
+<style>
+.ticket-card {
+    transition: all 0.2s ease;
+}
+.ticket-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+</style>
 {% endblock %}
