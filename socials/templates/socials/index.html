@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Social Media - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Social Media Feed</h1>
+        <p class="lead">Catch the latest vibes from our social media channels</p>
+    </div>
+
+    <!-- Social Media Profile Links -->
+    {% if social_profiles %}
+    <div class="text-center mb-5">
+        <h3 class="h5 fw-bold mb-4">Follow Us</h3>
+        <div class="d-flex justify-content-center gap-4 flex-wrap">
+            {% for profile in social_profiles %}
+                <a href="{{ profile.profile_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-{{ profile.platform|lower }}"></i>
+                    {{ profile.get_platform_display }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Social Posts Grid -->
+    {% if page_obj %}
+        <div class="row g-4">
+            {% for post in page_obj %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if post.platform == 'TIKTOK' %}
+                                    <i class="bi bi-music-note-beamed text-danger fs-4 me-2"></i>
+                                {% elif post.platform == 'INSTAGRAM' %}
+                                    <i class="bi bi-instagram text-danger fs-4 me-2"></i>
+                                {% elif post.platform == 'YOUTUBE' %}
+                                    <i class="bi bi-youtube text-danger fs-4 me-2"></i>
+                                {% elif post.platform == 'FACEBOOK' %}
+                                    <i class="bi bi-facebook text-primary fs-4 me-2"></i>
+                                {% endif %}
+                                <h5 class="card-title mb-0">{{ post.get_platform_display }}</h5>
+                            </div>
+                            
+                            {% if post.caption %}
+                                <p class="card-text">{{ post.caption|truncatewords:30|linebreaks }}</p>
+                            {% endif %}
+                            
+                            <a href="{{ post.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                View Post <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            </a>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            {{ post.created_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No social posts available at the moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Social posts pagination" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center">
+            <p class="text-muted">No social media posts available at the moment.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

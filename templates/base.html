@@ -31,6 +31,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'events:event_list' %}">Events</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'socials:index' %}">Socials</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -44,9 +47,21 @@
     <footer class="bg-dark text-white py-5 mt-5">
         <div class="container text-center">
             <div class="mb-4">
-                <a href="https://web.facebook.com/seven7miIlion/" target="_blank" class="text-white me-4 fs-3 hover-scale"><i class="fab fa-facebook"></i></a>
-                <a href="https://www.tiktok.com/@mkenyaisaak" target="_blank" class="text-white me-4 fs-3 hover-scale"><i class="fab fa-tiktok"></i></a>
-                <a href="https://www.instagram.com/mkenyaisaak/" target="_blank" class="text-white fs-3 hover-scale"><i class="fab fa-instagram"></i></a>
+                {% for profile in social_profiles %}
+                    <a href="{{ profile.profile_url }}" target="_blank" class="text-white me-4 fs-3 hover-scale">
+                        {% if profile.platform == 'FACEBOOK' %}
+                            <i class="fab fa-facebook"></i>
+                        {% elif profile.platform == 'TIKTOK' %}
+                            <i class="fab fa-tiktok"></i>
+                        {% elif profile.platform == 'INSTAGRAM' %}
+                            <i class="fab fa-instagram"></i>
+                        {% elif profile.platform == 'YOUTUBE' %}
+                            <i class="fab fa-youtube"></i>
+                        {% else %}
+                            <i class="fab fa-{{ profile.platform|lower }}"></i>
+                        {% endif %}
+                    </a>
+                {% endfor %}
             </div>
             <p class="mb-0 text-white-50">&copy; {% now "Y" %} Mkenya Isaak 7Million. All rights reserved.</p>
         </div>
