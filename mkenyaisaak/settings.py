@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'events',
     'socials',
     'users',
+    'mpesa',
 ]
 
 MIDDLEWARE = [

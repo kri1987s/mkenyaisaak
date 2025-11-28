@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="social-post-card h-100 position-relative">
+    {% if post.embed_code %}
+        <!-- Direct embed code display -->
+        <div class="embed-container">
+            {{ post.embed_code|safe }}
+        </div>
+    {% else %}
+        <!-- Thumbnail/Preview fallback -->
+        <div class="ratio ratio-9x16 bg-dark position-relative" onclick="openVideoModal('{{ post.platform }}', '{{ post.embed_url }}', '{{ post.embed_code|escapejs }}')">
+            {% if post.platform == 'youtube' %}
+                <img src="https://img.youtube.com/vi/{{ post.url|slice:'-11:' }}/hqdefault.jpg" class="object-fit-cover opacity-75 group-hover:opacity-100 transition-all cursor-pointer" alt="Video Thumbnail">
+            {% else %}
+                <!-- Generic placeholder for other platforms if no thumbnail API -->
+                <div class="d-flex align-items-center justify-content-center h-100 bg-secondary bg-opacity-10 cursor-pointer" onclick="openVideoModal('{{ post.platform }}', '{{ post.embed_url }}', '{{ post.embed_code|escapejs }}')">
+                    {% if post.platform == 'tiktok' %}
+                        <div class="text-center">
+                            <i class="bi bi-tiktok display-1 text-dark"></i>
+                            <p class="mt-2 text-muted fw-bold">Watch on TikTok</p>
+                        </div>
+                    {% elif post.platform == 'facebook' %}
+                        <div class="text-center">
+                            <i class="bi bi-facebook display-1 text-primary"></i>
+                            <p class="mt-2 text-muted fw-bold">Watch on Facebook</p>
+                        </div>
+                    {% elif post.platform == 'instagram' %}
+                        <div class="text-center">
+                            <i class="bi bi-instagram display-1 text-danger"></i>
+                            <p class="mt-2 text-muted fw-bold">Watch on Instagram</p>
+                        </div>
+                    {% else %}
+                        <i class="bi bi-play-circle-fill display-1 text-secondary opacity-50"></i>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- Play Overlay -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                <div class="btn btn-light rounded-circle p-3 shadow-lg transform-scale-hover">
+                    <i class="bi bi-play-fill fs-1 text-primary"></i>
+                </div>
+            </div>
+
+            <!-- Platform Icon Badge -->
+            <div class="position-absolute top-0 end-0 m-3">
+                <span class="badge bg-white text-dark shadow-sm rounded-pill py-2 px-3">
+                    {% if post.platform == 'tiktok' %}<i class="bi bi-tiktok"></i>
+                    {% elif post.platform == 'facebook' %}<i class="bi bi-facebook text-primary"></i>
+                    {% elif post.platform == 'instagram' %}<i class="bi bi-instagram text-danger"></i>
+                    {% elif post.platform == 'youtube' %}<i class="bi bi-youtube text-danger"></i>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="p-3 bg-white">
+        {% if post.title %}
+            <h6 class="mb-1">{{ post.title|truncatechars:100 }}</h6>
+        {% endif %}
+        {% if post.author %}
+            <small class="text-muted d-block mb-1">@{{ post.author }}</small>
+        {% endif %}
+        {% if post.caption %}
+            <p class="mb-0 small text-muted">{{ post.caption|truncatechars:200 }}</p>
+        {% elif post.url %}
+            <p class="mb-0 small text-muted">via {{ post.get_platform_display }}</p>
+        {% endif %}
+        {% if post.view_count > 0 %}
+            <small class="text-muted">{{ post.view_count }} views</small>
+        {% endif %}
+    </div>
+</div>

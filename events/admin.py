@@ -22,7 +22,12 @@ class EventAdmin(admin.ModelAdmin):
         ('Marketing', {
             'fields': ('marketing_qr_code',)
         }),
+        ('Audit', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
     )
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

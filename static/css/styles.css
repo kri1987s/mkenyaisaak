@@ -30,7 +30,7 @@ h6,
 
 /* Navbar */
 .navbar {
-    background-color: var(--primary-blue) !important;
+    background-color: var(--primary-blue);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -45,6 +45,7 @@ h6,
     text-transform: uppercase;
     font-size: 0.9rem;
     letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Buttons */
@@ -178,6 +179,36 @@ h6,
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Embed Container */
+.embed-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.embed-container iframe,
+.embed-container blockquote,
+.embed-container embed,
+.embed-container video,
+.embed-container audio {
+    width: 100%;
+    border: none;
+}
+
+/* General embed container styling */
+.embed-container {
+    width: 100%;
+}
+
+.embed-container iframe,
+.embed-container blockquote,
+.embed-container embed,
+.embed-container video,
+.embed-container audio {
+    width: 100%;
+    border: none;
 }
 
 /* Footer */

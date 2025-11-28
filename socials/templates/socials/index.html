@@ -26,43 +26,19 @@
 
     <!-- Social Posts Grid -->
     {% if page_obj %}
-        <div class="row g-4">
-            {% for post in page_obj %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                {% if post.platform == 'TIKTOK' %}
-                                    <i class="bi bi-music-note-beamed text-danger fs-4 me-2"></i>
-                                {% elif post.platform == 'INSTAGRAM' %}
-                                    <i class="bi bi-instagram text-danger fs-4 me-2"></i>
-                                {% elif post.platform == 'YOUTUBE' %}
-                                    <i class="bi bi-youtube text-danger fs-4 me-2"></i>
-                                {% elif post.platform == 'FACEBOOK' %}
-                                    <i class="bi bi-facebook text-primary fs-4 me-2"></i>
-                                {% endif %}
-                                <h5 class="card-title mb-0">{{ post.get_platform_display }}</h5>
-                            </div>
-                            
-                            {% if post.caption %}
-                                <p class="card-text">{{ post.caption|truncatewords:30|linebreaks }}</p>
-                            {% endif %}
-                            
-                            <a href="{{ post.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                View Post <i class="bi bi-box-arrow-up-right ms-1"></i>
-                            </a>
-                        </div>
-                        <div class="card-footer text-muted small">
-                            {{ post.created_at|date:"M d, Y" }}
-                        </div>
-                    </div>
+    <div class="row g-4 justify-content-center">
+        {% for post in page_obj %}
+            <div class="col-md-6 col-lg-4">
+                <div class="social-card bg-white shadow-sm rounded overflow-hidden h-100">
+                    {% include 'socials/partials/social_embeds.html' %}
                 </div>
-            {% empty %}
-                <div class="col-12 text-center">
-                    <p class="text-muted">No social posts available at the moment.</p>
-                </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No social posts found.</p>
+            </div>
+        {% endfor %}
+    </div>
 
         <!-- Pagination -->
         {% if page_obj.has_other_pages %}

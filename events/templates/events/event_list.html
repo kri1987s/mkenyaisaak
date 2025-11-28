@@ -1,30 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="text-center mb-5 fw-bold">All Events</h1>
-    <div class="row g-4">
+<div class="container py-5 position-relative" style="min-height: 80vh;">
+    <!-- Background Pattern -->
+    <div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; background: url('/media/background_pattern.jpg') center/cover no-repeat fixed;"></div>
+    <div class="position-fixed top-0 start-0 w-100 h-100 bg-white opacity-90" style="z-index: -1;"></div>
+
+    <h1 class="mb-4 fw-bold text-center display-5">All Upcoming Events</h1>
+    <div class="row g-4 justify-content-center">
         {% for event in events %}
-            <div class="col-md-4">
-                <div class="card h-100 event-card border-0 shadow-sm">
-                    {% if event.poster %}
-                        <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 300px; object-fit: cover;">
-                    {% else %}
-                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
-                            <span>No Poster</span>
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'events:event_detail' event.id %}" class="text-decoration-none text-dark">
+                    <div class="card h-100 event-card shadow-sm border-0 hover-lift transition-all">
+                        {% if event.poster %}
+                            <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }}" style="width: 100%; height: auto; object-fit: contain; max-height: 500px; background-color: #f8f9fa;" loading="lazy">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                                <i class="bi bi-calendar-event fs-1"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge bg-danger rounded-pill px-3 py-2">{{ event.date|date:"M d" }}</span>
+                                <small class="text-muted fw-bold">{{ event.date|date:"g:i A" }}</small>
+                            </div>
+                            <h3 class="card-title h5 fw-bold mb-2">{{ event.title }}</h3>
+                            <p class="card-text text-muted mb-3 small">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ event.venue }}
+                            </p>
+                            <div class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                Get Tickets <i class="bi bi-arrow-right ms-1"></i>
+                            </div>
                         </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ event.title }}</h5>
-                        <p class="card-text text-muted">
-                            <i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"M j, Y • g:i A" }}
-                        </p>
-                        <p class="card-text text-muted">
-                            <i class="bi bi-geo-alt me-2"></i>{{ event.venue }}
-                        </p>
-                        <a href="{% url 'events:event_detail' event.id %}" class="btn btn-dark w-100">View Details</a>
                     </div>
-                </div>
+                </a>
             </div>
         {% empty %}
             <div class="col-12 text-center">

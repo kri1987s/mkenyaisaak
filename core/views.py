@@ -20,9 +20,9 @@ class HomePageView(TemplateView):
         # As per user request, it's okay if the featured event appears twice
         context['upcoming_events'] = list(events)
 
-        # Fetch active social posts
+        # Fetch active social posts, ordered by recency (newest first)
         context['social_posts'] = SocialPost.objects.filter(
             is_active=True
-        ).order_by('-created_at')[:6].only('id', 'platform', 'url', 'caption', 'created_at')
+        ).order_by('-created_at')[:6].only('id', 'platform', 'url', 'caption', 'created_at', 'title', 'author')
 
         return context

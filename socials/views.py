@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from .models import SocialPost, SocialProfile
 
 def socials_index(request):
-    """Display all social posts with pagination"""
+    """Display all social posts with pagination, ordered by recency (newest first)"""
     social_posts = SocialPost.objects.filter(is_active=True).order_by('-created_at')
     paginator = Paginator(social_posts, 12)  # Show 12 posts per page
 

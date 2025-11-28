@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 position-relative" style="z-index: 1;">
     <div class="row">
         <div class="col-md-6 mb-4">
             {% if event.poster %}
@@ -13,41 +13,73 @@
             {% endif %}
         </div>
         <div class="col-md-6">
-            <h1 class="display-4 fw-bold mb-3">{{ event.title }}</h1>
-            <p class="lead text-muted mb-4">
-                <i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"l, F j, Y @ g:i A" }}<br>
-                <i class="bi bi-geo-alt me-2"></i>{{ event.venue }}
-            </p>
-            
-            <div class="mb-5">
-                <h3 class="h5 fw-bold">About this Event</h3>
-                <p>{{ event.description|linebreaks }}</p>
-            </div>
-
-            <div class="card bg-light border-0 p-4">
-                <h3 class="h4 fw-bold mb-3">Get Tickets</h3>
-                <ul class="list-group mb-4">
-                    {% for ticket in event.ticket_types.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ ticket.name }}
-                            <span class="badge bg-primary rounded-pill">KES {{ ticket.price }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'events:booking_create' event.id %}" class="btn btn-warning btn-lg w-100 fw-bold">Book Now</a>
-
-                <!-- Payment information -->
-                {% if event.payment_till_number or event.payment_account_number %}
-                    <div class="mt-4 pt-3 border-top">
-                        <h4 class="h5 fw-bold mb-2">Payment Options</h4>
-                        {% if event.payment_till_number %}
-                            <p class="mb-1"><i class="bi bi-cash-coin text-success me-2"></i><strong>Till Number:</strong> {{ event.payment_till_number }}</p>
-                        {% endif %}
-                        {% if event.payment_account_number %}
-                            <p class="mb-1"><i class="bi bi-bank text-info me-2"></i><strong>Bank Account:</strong> {{ event.payment_account_number }}</p>
-                        {% endif %}
+            <div class="bg-white bg-opacity-90 p-4 rounded shadow-sm backdrop-blur">
+                <div class="mb-4">
+                    <h1 class="display-4 fw-bold mb-2">{{ event.title }}</h1>
+                    <div class="d-flex align-items-center text-muted mb-3">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        <span class="me-3">{{ event.date|date:"l, F j, Y @ g:i A" }}</span>
+                        <i class="bi bi-geo-alt me-2"></i>
+                        <span>{{ event.venue }}</span>
                     </div>
-                {% endif %}
+                    
+                    <!-- Event Countdown -->
+                    <div class="p-3 bg-dark text-white rounded text-center mb-4">
+                        <div id="event-countdown" class="d-flex justify-content-center gap-3 gap-md-4" data-target-date="{{ event.date|date:'c' }}">
+                            <div class="text-center">
+                                <div class="h2 fw-bold text-warning mb-0 countdown-value" data-unit="days">00</div>
+                                <small class="text-uppercase letter-spacing-1 text-white-50" style="font-size: 0.6rem;">Days</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="h2 fw-bold text-warning mb-0 countdown-value" data-unit="hours">00</div>
+                                <small class="text-uppercase letter-spacing-1 text-white-50" style="font-size: 0.6rem;">Hours</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="h2 fw-bold text-warning mb-0 countdown-value" data-unit="minutes">00</div>
+                                <small class="text-uppercase letter-spacing-1 text-white-50" style="font-size: 0.6rem;">Minutes</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="h2 fw-bold text-warning mb-0 countdown-value" data-unit="seconds">00</div>
+                                <small class="text-uppercase letter-spacing-1 text-white-50" style="font-size: 0.6rem;">Seconds</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-5">
+                    <h3 class="h5 fw-bold">About this Event</h3>
+                    <p>{{ event.description|linebreaks }}</p>
+                </div>
+
+                <div class="card bg-light border-0 p-4">
+                    <h3 class="h4 fw-bold mb-3">Get Tickets</h3>
+                    
+                    {% if event.payment_till_number %}
+                        <div class="alert alert-success border-0 shadow-sm mb-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success me-2">M-PESA</span>
+                                <h5 class="alert-heading fw-bold mb-0">Pay to Till Number</h5>
+                            </div>
+                            <div class="display-6 fw-bold text-center my-3">{{ event.payment_till_number }}</div>
+                            <p class="mb-0 small text-center text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                After paying, wait for the M-Pesa SMS. <strong>That SMS is your ticket.</strong>
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <ul class="list-group mb-4">
+                        {% for ticket in event.ticket_types.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ ticket.name }}
+                                <span class="badge bg-primary rounded-pill">KES {{ ticket.price }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'events:booking_create' event.id %}" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm">
+                        <i class="bi bi-ticket-perforated me-2"></i>Book Now
+                    </a>
+                </div>
             </div>
         </div>
     </div>
