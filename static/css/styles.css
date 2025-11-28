@@ -184,19 +184,55 @@ h6,
     background: #f8f9fa;
 }
 
-.social-card {
-    min-width: 300px;
+/* Homepage social scroll cards */
+.homepage-social-card {
+    width: 320px;  /* Fixed width for consistency */
     margin-right: 20px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: auto;  /* Allow cards to size based on content */
+    min-height: 400px;  /* Minimum height for consistent appearance */
 }
 
-/* Embed Container */
+/* Socials page grid cards */
+.social-grid-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: 100%;  /* For grid layout, maintain equal heights per row */
+}
+
+.social-post-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 200px;  /* Minimum height for consistent appearance */
+}
+
+/* Ensure embed container maintains aspect ratio properly */
 .embed-container {
-    position: relative;
     width: 100%;
     overflow: hidden;
+    flex-shrink: 0;  /* Don't let embeds shrink */
+}
+
+/* Content area styling - always at the bottom */
+.social-post-card .p-3 {
+    margin-top: auto;  /* Push content area to bottom */
+    background: white;
+    z-index: 2;
+    width: 100%;
+}
+
+/* General embed container styling */
+.embed-container {
+    width: 100%;
+    position: relative;
 }
 
 .embed-container iframe,
@@ -208,9 +244,28 @@ h6,
     border: none;
 }
 
+/* Make TikTok embeds responsive */
+.tiktok-embed-container {
+    position: relative;
+    width: 100%;
+    padding-top: 177.78%; /* 9:16 aspect ratio */
+    height: 0;
+}
+
+.tiktok-embed-container blockquote {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
 /* General embed container styling */
 .embed-container {
     width: 100%;
+    position: relative;
 }
 
 .embed-container iframe,
