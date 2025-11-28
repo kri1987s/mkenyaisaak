@@ -155,7 +155,7 @@
         
         <div class="d-flex overflow-auto social-scroll-container pb-3 gap-3 px-3">
             {% for post in social_posts %}
-                <div class="homepage-social-card bg-white shadow-sm rounded overflow-hidden">
+                <div class="social-card bg-white shadow-sm rounded overflow-hidden d-flex flex-column" style="min-height: 400px;">
                     {% include 'socials/partials/social_embeds.html' %}
                 </div>
             {% empty %}
