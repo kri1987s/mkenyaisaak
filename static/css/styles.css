@@ -184,12 +184,6 @@ h6,
     background: #f8f9fa;
 }
 
-/* Social Feed */
-.social-scroll-container {
-    padding: 20px 0;
-    background: #f8f9fa;
-}
-
 .social-card {
     min-width: 300px;
     width: 320px;
@@ -197,21 +191,6 @@ h6,
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* General embed container styling */
-.embed-container {
-    width: 100%;
-    position: relative;
-}
-
-.embed-container iframe,
-.embed-container blockquote,
-.embed-container embed,
-.embed-container video,
-.embed-container audio {
-    width: 100%;
-    border: none;
 }
 
 /* Make TikTok embeds responsive */

@@ -1,14 +1,14 @@
 {% load static %}
 
-<div class="social-post-card h-100 d-flex flex-column position-relative">
+<div class="social-post-card position-relative">
     {% if post.embed_code %}
         <!-- Direct embed code display -->
-        <div class="embed-container flex-grow-1">
+        <div class="embed-container">
             {{ post.embed_code|safe }}
         </div>
     {% else %}
         <!-- Thumbnail/Preview fallback -->
-        <div class="flex-grow-1 ratio ratio-9x16 bg-dark position-relative" onclick="openVideoModal('{{ post.platform }}', '{{ post.embed_url }}', '{{ post.embed_code|escapejs }}')">
+        <div class="ratio ratio-9x16 bg-dark position-relative" onclick="openVideoModal('{{ post.platform }}', '{{ post.embed_url }}', '{{ post.embed_code|escapejs }}')">
             {% if post.platform == 'youtube' %}
                 <img src="https://img.youtube.com/vi/{{ post.url|slice:'-11:' }}/hqdefault.jpg" class="object-fit-cover opacity-75 group-hover:opacity-100 transition-all cursor-pointer" alt="Video Thumbnail">
             {% else %}
@@ -55,7 +55,7 @@
         </div>
     {% endif %}
 
-    <div class="mt-auto p-3 bg-white">
+    <div class="p-3 bg-white">
         {% if post.title %}
             <h6 class="mb-1">{{ post.title|truncatechars:100 }}</h6>
         {% endif %}
