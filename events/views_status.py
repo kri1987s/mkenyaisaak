@@ -145,28 +145,33 @@ def check_payment_status_by_phone(request):
         # Find all bookings with this phone number (could be multiple)
         bookings = Booking.objects.filter(customer_phone__endswith=formatted_phone[-9:]).order_by('-created_at')  # Last 9 digits should match
 
-        # Check all pending bookings for this phone number
-        updated_bookings = []
+        # First, separate PAID and PENDING bookings
+        paid_bookings = []
+        pending_bookings = []
+
         for booking in bookings:
-            if booking.payment_status == 'PENDING' and booking.payment_reference:
-                # Try to fetch M-Pesa status for this booking
+            if booking.payment_status == 'PAID':
+                paid_bookings.append(booking)
+            elif booking.payment_status == 'PENDING' and booking.payment_reference:
+                # Check if this pending booking has been paid by querying M-Pesa
                 from .utils import check_mpesa_transaction_status
                 check_mpesa_transaction_status(booking)
                 # Refresh from DB to get any updates
                 booking.refresh_from_db()
 
-                # If it's now PAID, add to updated list
                 if booking.payment_status == 'PAID':
-                    updated_bookings.append(booking)
+                    paid_bookings.append(booking)
+                else:
+                    pending_bookings.append(booking)
 
-        # If we found updated bookings, return all of them
-        if updated_bookings:
-            # Return the most recently updated one, but include info about all
-            latest_paid = updated_bookings[0]  # Since they're ordered by created_at desc
+        # If we have any paid bookings, prioritize showing those
+        if paid_bookings:
+            # Return the most recent paid booking
+            latest_paid = paid_bookings[0]  # They're already ordered by -created_at
 
             # Prepare list of all paid bookings
             all_paid_bookings = []
-            for booking in updated_bookings:
+            for booking in paid_bookings:
                 all_paid_bookings.append({
                     'booking_id': str(booking.id),
                     'payment_status': booking.payment_status,
@@ -187,8 +192,7 @@ def check_payment_status_by_phone(request):
                 'all_paid_bookings': all_paid_bookings  # Include all paid bookings from this phone
             })
 
-        # If we find bookings but none are updated to PAID, return all pending ones
-        pending_bookings = [b for b in bookings if b.payment_status == 'PENDING']
+        # If no paid bookings, show pending ones (with most recent first)
         if pending_bookings:
             latest_pending = pending_bookings[0]  # Most recent
 
@@ -204,7 +208,7 @@ def check_payment_status_by_phone(request):
                 })
 
             return JsonResponse({
-                'status': 'partial_success',  # Different status to indicate pending bookings
+                'status': 'partial_success',
                 'booking_id': str(latest_pending.id),
                 'payment_status': latest_pending.payment_status,
                 'payment_reference': latest_pending.payment_reference,
