@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
             url = '{% url "events:check_payment_status_by_receipt" %}';
             params.append('receipt', value);
         } else if (method === 'booking') {
-            url = `{% url "events:check_payment_status" "REPLACE_ID" %}`.replace('REPLACE_ID', value);
+            url = '/events/api/payment-status/' + value + '/';
         }
         
         if (method !== 'booking') {
