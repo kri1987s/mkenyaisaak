@@ -52,7 +52,7 @@ class MpesaClient:
             "BusinessShortCode": self.shortcode,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",
+            "TransactionType": "CustomerBuyGoodsOnline",
             "Amount": amount,
             "PartyA": phone_number,
             "PartyB": self.shortcode,

@@ -35,7 +35,10 @@ def initiate_payment(request):
             callback_url=callback_url
         )
         
-        return JsonResponse(response)
+        return render(request, 'mpesa/result.html', {
+            'response': response,
+            'phone_number': phone_number
+        })
         
     return render(request, 'mpesa/initiate.html')
 
@@ -45,7 +48,7 @@ def mpesa_callback(request):
     try:
         data = json.loads(request.body)
         # Log the callback data
-        print("M-Pesa Callback Data:", data)
+        print(f"M-Pesa Callback Data: {json.dumps(data, indent=2)}")
         
         # Process the data (save to DB, update order status, etc.)
         # result_code = data['Body']['stkCallback']['ResultCode']

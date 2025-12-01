@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Payment Initiated</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-phone-vibrate display-1 text-success"></i>
+                    </div>
+                    
+                    {% if response.ResponseCode == '0' %}
+                        <h3 class="card-title text-success">Check your phone!</h3>
+                        <p class="card-text lead">We've sent an M-Pesa payment request to <strong>{{ phone_number }}</strong>.</p>
+                        <p>Please enter your M-Pesa PIN to complete the transaction.</p>
+                        
+                        <div class="alert alert-light border mt-4">
+                            <small class="text-muted d-block text-start">Request ID:</small>
+                            <code class="d-block text-start">{{ response.CheckoutRequestID }}</code>
+                        </div>
+                    {% else %}
+                        <h3 class="card-title text-danger">Something went wrong</h3>
+                        <p class="card-text">{{ response.ResponseDescription|default:"Unknown error occurred." }}</p>
+                        <p class="text-muted">Error Code: {{ response.ResponseCode }}</p>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'mpesa_initiate' %}" class="btn btn-outline-primary">Try Again</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
