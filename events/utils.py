@@ -23,7 +23,7 @@ def generate_qr_code(data):
 
 def send_ticket_confirmation_email(booking):
     subject = f"Your Tickets for {booking.tickets.first().ticket_type.event.title}"
-    
+
     # Generate QR codes for all tickets if not already generated
     for ticket in booking.tickets.all():
         if not ticket.qr_code:
@@ -32,12 +32,41 @@ def send_ticket_confirmation_email(booking):
 
     html_message = render_to_string('events/emails/ticket_confirmation.html', {'booking': booking})
     plain_message = strip_tags(html_message)
-    
+
     send_mail(
         subject,
         plain_message,
         settings.DEFAULT_FROM_EMAIL,
         [booking.customer_email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+def send_booking_notification_email(booking):
+    """Send booking notification email to the event organizer"""
+    # Get the event associated with this booking
+    event = booking.tickets.first().ticket_type.event if booking.tickets.first() else None
+
+    if not event or not event.notification_email:
+        # If no notification email is set, exit early
+        return
+
+    subject = f"New Booking Notification - {event.title}"
+
+    context = {
+        'booking': booking,
+        'event': event,
+    }
+
+    html_message = render_to_string('events/emails/booking_notification.html', context)
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@mkenyaisaak.com',
+        recipient_list=[event.notification_email],
         html_message=html_message,
         fail_silently=False,
     )

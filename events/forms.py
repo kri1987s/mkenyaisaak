@@ -2,7 +2,7 @@ from django import forms
 from .models import TicketType
 
 class BookingForm(forms.Form):
-    customer_name = forms.CharField(max_length=200, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Name (Optional)'}))
+    customer_name = forms.CharField(max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Full Name (Required)'}))
     customer_email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@example.com (Optional)'}))
     customer_phone = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0712345678 (Required)'}))
 

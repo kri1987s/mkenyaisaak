@@ -13,6 +13,8 @@ class Event(models.Model):
     payment_till_number = models.CharField(max_length=20, blank=True, null=True, help_text="Till number for offline payment")
     payment_account_number = models.CharField(max_length=50, blank=True, null=True, help_text="Account number for bank transfers")
     payment_instructions = models.TextField(blank=True, null=True, help_text="Additional payment instructions")
+    # Notification settings
+    notification_email = models.EmailField(max_length=254, blank=True, null=True, help_text="Email to receive booking notifications")
     marketing_qr_code = models.ImageField(upload_to='marketing_qrs/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -53,9 +55,10 @@ class Booking(models.Model):
             try:
                 old_booking = Booking.objects.get(pk=self.pk)
                 if old_booking.payment_status != 'PAID' and self.payment_status == 'PAID':
-                    from .utils import send_ticket_confirmation_email
+                    from .utils import send_ticket_confirmation_email, send_booking_notification_email
                     super().save(*args, **kwargs)
                     send_ticket_confirmation_email(self)
+                    send_booking_notification_email(self)  # Send notification to organizer
                     return
             except Booking.DoesNotExist:
                 # This shouldn't normally happen if self.pk exists, but handle it gracefully

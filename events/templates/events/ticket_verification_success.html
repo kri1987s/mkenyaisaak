@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket Verification - Mkenya Isaak 7 Million{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Ticket Verified</h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-ticket-detailed text-success display-1"></i>
+                    </div>
+                    
+                    <h4 class="text-success">Valid Ticket!</h4>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Event</h5>
+                                    <p class="card-text">{{ ticket.ticket_type.event.title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Ticket Type</h5>
+                                    <p class="card-text">{{ ticket.ticket_type.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Customer</h5>
+                                    <p class="card-text">{{ booking.customer_name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">M-Pesa Receipt</h5>
+                                    <p class="card-text">{{ booking.mpesa_receipt_number|default:"N/A" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Ticket Code</h5>
+                                    <p class="card-text">{{ ticket.ticket_code }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Status</h5>
+                                    <p class="card-text">
+                                        <span class="badge bg-success">{{ booking.payment_status }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'events:event_detail' ticket.ticket_type.event.id %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Event
+                        </a>
+                        <a href="{% url 'events:verify_ticket_direct' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-check2-square me-1"></i> Verify Another
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

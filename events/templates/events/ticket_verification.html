@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Ticket - Mkenya Isaak 7 Million{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0"><i class="bi bi-ticket-detailed me-2"></i>Verify Ticket</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-muted">Enter your ticket code or M-Pesa receipt number to verify your ticket</p>
+                    
+                    <form id="verify-ticket-form" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="ticket_code" class="form-label">Ticket Code or M-Pesa Receipt Number</label>
+                            <input type="text" class="form-control form-control-lg" id="ticket_code" name="ticket_code" placeholder="Enter code here" required>
+                            <div class="form-text">Enter the 8-digit ticket code or the M-Pesa receipt number</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-search me-2"></i>Verify Ticket
+                        </button>
+                    </form>
+                    
+                    {% if error_message %}
+                    <div class="alert alert-danger mt-3" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ error_message }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

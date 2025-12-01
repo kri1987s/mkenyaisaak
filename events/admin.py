@@ -19,6 +19,10 @@ class EventAdmin(admin.ModelAdmin):
             'fields': ('payment_till_number', 'payment_account_number', 'payment_instructions'),
             'description': 'Offline payment details for this event'
         }),
+        ('Notifications', {
+            'fields': ('notification_email',),
+            'description': 'Email to receive booking notifications'
+        }),
         ('Marketing', {
             'fields': ('marketing_qr_code',)
         }),
@@ -31,12 +35,62 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer_name', 'customer_email', 'total_amount', 'payment_status', 'created_at')
-    list_filter = ('payment_status', 'created_at')
-    search_fields = ('customer_name', 'customer_email', 'customer_phone', 'id')
+    list_display = ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount', 'payment_status', 'payment_reference', 'mpesa_receipt_number', 'created_at')
+    list_filter = ('payment_status', 'created_at', 'payment_reference', 'mpesa_receipt_number')
+    search_fields = ('customer_name', 'customer_email', 'customer_phone', 'id', 'payment_reference', 'mpesa_receipt_number')
+    readonly_fields = ('id', 'created_at', 'updated_at')
+    ordering = ('-created_at',)
+
+    # Group fields in the form
+    fieldsets = (
+        ('Booking Information', {
+            'fields': ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount')
+        }),
+        ('Payment Details', {
+            'fields': ('payment_status', 'payment_reference', 'mpesa_receipt_number')
+        }),
+        ('Audit', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('ticket_code', 'booking', 'ticket_type', 'checked_in_at_gate1', 'checked_in_at_gate2')
-    search_fields = ('ticket_code', 'booking__customer_name')
-    list_filter = ('ticket_type', 'ticket_type__event')
+    list_display = ('ticket_code', 'booking_customer_name', 'booking_phone', 'ticket_type', 'event_name', 'checked_in_at_gate1', 'checked_in_at_gate2', 'booking_status')
+    search_fields = ('ticket_code', 'booking__customer_name', 'booking__customer_phone', 'booking__customer_email')
+    list_filter = ('ticket_type__event', 'ticket_type', 'checked_in_at_gate1', 'checked_in_at_gate2', 'booking__payment_status')
+    readonly_fields = ('created_at',)
+
+    def booking_customer_name(self, obj):
+        return obj.booking.customer_name
+    booking_customer_name.short_description = 'Customer Name'
+
+    def booking_phone(self, obj):
+        return obj.booking.customer_phone
+    booking_phone.short_description = 'Customer Phone'
+
+    def event_name(self, obj):
+        return obj.ticket_type.event.title
+    event_name.short_description = 'Event'
+
+    def booking_status(self, obj):
+        return obj.booking.payment_status
+    booking_status.short_description = 'Payment Status'
+
+    # Add fieldsets for better organization
+    fieldsets = (
+        ('Ticket Information', {
+            'fields': ('ticket_code', 'ticket_type', 'qr_code')
+        }),
+        ('Booking Details', {
+            'fields': ('booking',)
+        }),
+        ('Check-in Status', {
+            'fields': ('checked_in_at_gate1', 'checked_in_at_gate2')
+        }),
+        ('Audit', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )

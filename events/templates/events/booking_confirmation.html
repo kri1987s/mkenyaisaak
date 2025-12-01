@@ -73,7 +73,10 @@
                         {% if booking.customer_email %}They will be sent to <strong>{{ booking.customer_email }}</strong>.{% endif %}
                     </p>
 
-                    <a href="{% url 'core:home' %}" class="btn btn-dark mt-3">Return Home</a>
+                    <a href="{% url 'core:home' %}" class="btn btn-dark mt-3 me-2">Return Home</a>
+                    <a href="{% url 'events:booking_confirmation' booking.id %}" class="btn btn-outline-primary mt-3" onclick="window.print(); return false;">
+                        <i class="bi bi-printer me-2"></i>Print Ticket
+                    </a>
 
                     <div class="alert alert-warning mt-4">
                         <p class="mb-0"><strong>Note:</strong> This booking feature is still under development. Please contact us directly for assistance.</p>
@@ -83,4 +86,27 @@
         </div>
     </div>
 </div>
+
+<script>
+// Add print functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add custom print styles when printing
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            .btn, .alert, .navbar, .footer, .breadcrumb {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+            }
+            body {
+                background: white !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
 {% endblock %}
