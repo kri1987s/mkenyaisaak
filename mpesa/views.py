@@ -50,14 +50,27 @@ def mpesa_callback(request):
         # Log the callback data
         print(f"M-Pesa Callback Data: {json.dumps(data, indent=2)}")
         
-        # Process the data (save to DB, update order status, etc.)
-        # result_code = data['Body']['stkCallback']['ResultCode']
-        # if result_code == 0:
-        #     # Success
-        #     pass
-        # else:
-        #     # Failed
-        #     pass
+        # Process the data
+        stk_callback = data.get('Body', {}).get('stkCallback', {})
+        result_code = stk_callback.get('ResultCode')
+        checkout_request_id = stk_callback.get('CheckoutRequestID')
+        
+        if checkout_request_id:
+            from events.models import Booking
+            try:
+                booking = Booking.objects.get(payment_reference=checkout_request_id)
+                
+                if result_code == 0:
+                    booking.payment_status = 'PAID'
+                    booking.save()
+                    print(f"Booking {booking.id} marked as PAID.")
+                else:
+                    booking.payment_status = 'FAILED'
+                    booking.save()
+                    print(f"Booking {booking.id} marked as FAILED. Reason: {stk_callback.get('ResultDesc')}")
+                    
+            except Booking.DoesNotExist:
+                print(f"Booking with CheckoutRequestID {checkout_request_id} not found.")
             
         return JsonResponse({"result": "ok"})
     except Exception as e:
