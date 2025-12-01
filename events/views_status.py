@@ -145,84 +145,60 @@ def check_payment_status_by_phone(request):
         # Find all bookings with this phone number (could be multiple)
         bookings = Booking.objects.filter(customer_phone__endswith=formatted_phone[-9:]).order_by('-created_at')  # Last 9 digits should match
 
-        # First, separate PAID and PENDING bookings
-        paid_bookings = []
-        pending_bookings = []
-
+        # Check status for all pending bookings by querying M-Pesa
         for booking in bookings:
-            if booking.payment_status == 'PAID':
-                paid_bookings.append(booking)
-            elif booking.payment_status == 'PENDING' and booking.payment_reference:
+            if booking.payment_status == 'PENDING' and booking.payment_reference:
                 # Check if this pending booking has been paid by querying M-Pesa
                 from .utils import check_mpesa_transaction_status
                 check_mpesa_transaction_status(booking)
                 # Refresh from DB to get any updates
                 booking.refresh_from_db()
 
-                if booking.payment_status == 'PAID':
-                    paid_bookings.append(booking)
-                else:
-                    pending_bookings.append(booking)
+        # Group all bookings by event for better organization
+        from collections import defaultdict
+        bookings_by_event = defaultdict(list)
 
-        # If we have any paid bookings, prioritize showing those
-        if paid_bookings:
-            # Return the most recent paid booking
-            latest_paid = paid_bookings[0]  # They're already ordered by -created_at
+        for booking in bookings:
+            # Get the event from the first associated ticket
+            first_ticket = booking.tickets.first()
+            event_name = "Unknown Event"
+            if first_ticket and first_ticket.ticket_type.event:
+                event_name = first_ticket.ticket_type.event.title
 
-            # Prepare list of all paid bookings
-            all_paid_bookings = []
-            for booking in paid_bookings:
-                all_paid_bookings.append({
-                    'booking_id': str(booking.id),
-                    'payment_status': booking.payment_status,
-                    'payment_reference': booking.payment_reference,
-                    'mpesa_receipt_number': booking.mpesa_receipt_number,
-                    'total_amount': str(booking.total_amount),
-                    'created_at': booking.created_at.isoformat()
-                })
+            booking_info = {
+                'booking_id': str(booking.id),
+                'customer_name': booking.customer_name,
+                'payment_status': booking.payment_status,
+                'payment_reference': booking.payment_reference,
+                'mpesa_receipt_number': booking.mpesa_receipt_number,
+                'total_amount': str(booking.total_amount),
+                'created_at': booking.created_at.isoformat(),
+                'updated_at': booking.updated_at.isoformat(),
+                'ticket_count': booking.tickets.count(),
+                'ticket_codes': [ticket.ticket_code for ticket in booking.tickets.all()]
+            }
 
-            return JsonResponse({
-                'status': 'success',
-                'booking_id': str(latest_paid.id),
-                'payment_status': latest_paid.payment_status,
-                'payment_reference': latest_paid.payment_reference,
-                'mpesa_receipt_number': latest_paid.mpesa_receipt_number,
-                'total_amount': str(latest_paid.total_amount),
-                'updated_at': latest_paid.updated_at.isoformat(),
-                'all_paid_bookings': all_paid_bookings  # Include all paid bookings from this phone
-            })
+            bookings_by_event[event_name].append(booking_info)
 
-        # If no paid bookings, show pending ones (with most recent first)
-        if pending_bookings:
-            latest_pending = pending_bookings[0]  # Most recent
+        # Return all bookings grouped by event
+        all_bookings_grouped = {}
+        for event_name, booking_list in bookings_by_event.items():
+            all_bookings_grouped[event_name] = sorted(booking_list, key=lambda x: x['created_at'], reverse=True)
 
-            all_pending_info = []
-            for booking in pending_bookings:
-                all_pending_info.append({
-                    'booking_id': str(booking.id),
-                    'payment_status': booking.payment_status,
-                    'payment_reference': booking.payment_reference,
-                    'mpesa_receipt_number': booking.mpesa_receipt_number,
-                    'total_amount': str(booking.total_amount),
-                    'created_at': booking.created_at.isoformat()
-                })
-
-            return JsonResponse({
-                'status': 'partial_success',
-                'booking_id': str(latest_pending.id),
-                'payment_status': latest_pending.payment_status,
-                'payment_reference': latest_pending.payment_reference,
-                'mpesa_receipt_number': latest_pending.mpesa_receipt_number,
-                'total_amount': str(latest_pending.total_amount),
-                'updated_at': latest_pending.updated_at.isoformat(),
-                'all_pending_bookings': all_pending_info
-            })
-
-        # If no bookings found for this phone number
         return JsonResponse({
-            'status': 'error',
-            'message': 'No booking found for this phone number. Please make sure you used this number when booking.'
-        }, status=404)
+            'status': 'success',
+            'booking_groups': all_bookings_grouped,
+            'total_bookings': len(bookings),
+            'phone_number': formatted_phone
+        })
+
+    # If no bookings found for this phone number
+    return JsonResponse({
+        'status': 'success',  // Return success but with empty groups
+        'booking_groups': {},
+        'total_bookings': 0,
+        'phone_number': formatted_phone
+    })
 
     except Exception as e:
         return JsonResponse({

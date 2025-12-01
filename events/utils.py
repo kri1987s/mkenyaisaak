@@ -99,13 +99,11 @@ def check_mpesa_transaction_status(booking):
         # Transaction has been completed successfully
         # Extract M-Pesa receipt number from the response
         result_params = result.get('ResultParams', {})
+        mpesa_receipt_number = None
+        transaction_date = None
+
         if 'TransactionID' in result_params:
             mpesa_receipt_number = result_params['TransactionID']
-            booking.mpesa_receipt_number = mpesa_receipt_number
-            booking.payment_status = 'PAID'  # Ensure status is PAID
-            booking.save()
-            print(f"Updated booking {booking.id} with M-Pesa receipt: {mpesa_receipt_number}")
-            return True
         elif 'CallbackMetadata' in result_params:
             # Try to get from CallbackMetadata
             callback_metadata = result_params['CallbackMetadata']
@@ -113,11 +111,28 @@ def check_mpesa_transaction_status(booking):
             for item in items:
                 if item.get('Name') == 'TransactionID':
                     mpesa_receipt_number = item.get('Value')
-                    booking.mpesa_receipt_number = mpesa_receipt_number
-                    booking.payment_status = 'PAID'
-                    booking.save()
-                    print(f"Updated booking {booking.id} with M-Pesa receipt from callback: {mpesa_receipt_number}")
-                    return True
+                elif item.get('Name') == 'TransactionDate':
+                    transaction_date = item.get('Value')
+
+        if mpesa_receipt_number:
+            # Check if status is changing to PAID to send emails appropriately
+            old_status = booking.payment_status
+            booking.mpesa_receipt_number = mpesa_receipt_number
+            if transaction_date:
+                booking.mpesa_transaction_date = str(transaction_date)
+            booking.payment_status = 'PAID'
+            booking.save()
+
+            # Send emails if status changed to PAID
+            if old_status != 'PAID':
+                from .utils import send_ticket_confirmation_email, send_booking_notification_email
+                send_ticket_confirmation_email(booking)
+                send_booking_notification_email(booking)  # Send notification to organizer
+                print(f"Updated booking {booking.id} with M-Pesa receipt: {mpesa_receipt_number} and sent emails")
+            else:
+                print(f"Updated booking {booking.id} with M-Pesa receipt: {mpesa_receipt_number}")
+
+            return True
     elif response_code == '1001':
         # Transaction still pending
         print(f"Transaction {booking.payment_reference} still pending.")

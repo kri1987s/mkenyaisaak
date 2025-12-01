@@ -173,8 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.status === 'success') {
                     showSuccess(data);
-                } else if (data.status === 'partial_success') {
-                    showPartialSuccess(data);
                 } else {
                     showErrorMessage(data.message || 'Verification failed');
                 }
@@ -192,144 +190,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showSuccess(data) {
-        // Build message based on whether user has multiple bookings
+        // Build message based on total number of bookings found
         let message = `<i class="bi bi-check-circle-fill text-success me-2"></i>`;
-        if (data.all_paid_bookings && data.all_paid_bookings.length > 1) {
-            message += `You have ${data.all_paid_bookings.length} confirmed bookings! `;
+        if (data.total_bookings > 0) {
+            message += `You have ${data.total_bookings} ticket${data.total_bookings > 1 ? 's' : ''} associated with this phone number.`;
         } else {
-            message += `Your ticket is confirmed! `;
-        }
-        message += `Payment status: <strong>${data.payment_status}</strong>.`;
-        if (data.mpesa_receipt_number) {
-            message += ` M-Pesa Receipt: <strong>${data.mpesa_receipt_number}</strong>`;
+            message += `No tickets found for this phone number.`;
         }
 
         resultMessage.innerHTML = message;
         resultContainer.style.display = 'block';
         errorContainer.style.display = 'none';
 
-        // Build booking details
+        // Build ticket details grouped by event
         const bookingDetails = document.getElementById('booking-details');
-        let bookingInfoHTML = `
+        let ticketsInfoHTML = `
             <div class="card border-success">
                 <div class="card-body">
-                    <h5 class="card-title">Booking Details</h5>
+                    <h5 class="card-title">Your Tickets</h5>
         `;
 
-        // If there are multiple paid bookings, show them all
-        if (data.all_paid_bookings && data.all_paid_bookings.length > 1) {
-            bookingInfoHTML += `<h6>All Confirmed Bookings:</h6><div class="row">`;
-            data.all_paid_bookings.forEach(booking => {
-                bookingInfoHTML += `
+        // Loop through each event group
+        for (const [eventName, bookingList] of Object.entries(data.booking_groups)) {
+            ticketsInfoHTML += `
+            <div class="mb-4">
+                <h6 class="border-bottom pb-2">${eventName}</h6>
+                <div class="row">
+            `;
+
+            bookingList.forEach(booking => {
+                // Determine status badge color and text
+                let statusClass = 'bg-secondary';
+                let statusText = booking.payment_status;
+                if (booking.payment_status === 'PAID') {
+                    statusClass = 'bg-success';
+                } else if (booking.payment_status === 'PENDING') {
+                    statusClass = 'bg-warning text-dark';
+                } else if (booking.payment_status === 'FAILED') {
+                    statusClass = 'bg-danger';
+                }
+
+                ticketsInfoHTML += `
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h6 class="card-title">Booking</h6>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="card-title">Ticket${booking.ticket_count > 1 ? 's' : ''}</h6>
+                                <span class="badge ${statusClass}">${booking.payment_status}</span>
+                            </div>
                             <p class="card-text">
-                                <strong>ID:</strong> <code>${booking.booking_id.substring(0, 8)}...</code><br>
+                                <strong>Ticket${booking.ticket_count > 1 ? 's' : ''}:</strong> ${booking.ticket_codes.join(', ')}<br>
+                                <strong>Qty:</strong> ${booking.ticket_count}<br>
                                 <strong>Amount:</strong> KES ${booking.total_amount}<br>
-                                <strong>Status:</strong> <span class="badge bg-success">${booking.payment_status}</span><br>
                                 ${booking.mpesa_receipt_number ? `<strong>Receipt:</strong> ${booking.mpesa_receipt_number}<br>` : ''}
-                                <small class="text-muted">${new Date(booking.created_at).toLocaleString()}</small>
+                                <small class="text-muted">Purchased: ${new Date(booking.created_at).toLocaleString()}</small>
                             </p>
                         </div>
                     </div>
                 </div>
                 `;
             });
-            bookingInfoHTML += `</div>`;
-        } else {
-            // Show single booking details
-            bookingInfoHTML += `
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Booking ID</div>
-                            <code>${data.booking_id}</code>
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Payment Status</div>
-                            <span class="badge bg-success">${data.payment_status}</span>
-                        </div>
-                    </li>
-                    ${data.mpesa_receipt_number ? `
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">M-Pesa Receipt</div>
-                            <span class="text-success">${data.mpesa_receipt_number}</span>
-                        </div>
-                    </li>
-                    ` : ''}
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Amount</div>
-                            KES ${data.total_amount}
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Date Updated</div>
-                            ${new Date(data.updated_at).toLocaleString()}
-                        </div>
-                    </li>
-                </ul>
+
+            ticketsInfoHTML += `
+                </div>
+            </div>
             `;
         }
 
-        bookingInfoHTML += `
+        ticketsInfoHTML += `
                 </div>
             </div>
         `;
 
-        bookingDetails.innerHTML = bookingInfoHTML;
+        bookingDetails.innerHTML = ticketsInfoHTML;
     }
     
-    function showPartialSuccess(data) {
-        resultMessage.innerHTML = `
-            <i class="bi bi-info-circle-fill text-info me-2"></i>
-            Found ${data.all_pending_bookings ? data.all_pending_bookings.length : 'some'} booking(s) associated with your phone number. Payment status is still pending. We're checking with M-Pesa to confirm.
-        `;
-        resultContainer.style.display = 'block';
-        errorContainer.style.display = 'none';
-
-        // Build booking details
-        const bookingDetails = document.getElementById('booking-details');
-        bookingDetails.innerHTML = `
-            <div class="card border-info">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Bookings</h5>
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Payment status is still pending.</strong>
-                        We're checking with M-Pesa to confirm your payment.
-                        If you just completed payment, please wait a few minutes and try again.
-                    </div>
-                    ${data.all_pending_bookings ? `
-                    <h6>Pending Bookings:</h6>
-                    <div class="row">
-                        ${data.all_pending_bookings.map(booking => `
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h6 class="card-title">Booking</h6>
-                                    <p class="card-text">
-                                        <strong>ID:</strong> <code>${booking.booking_id.substring(0, 8)}...</code><br>
-                                        <strong>Amount:</strong> KES ${booking.total_amount}<br>
-                                        <strong>Status:</strong> <span class="badge bg-warning">${booking.payment_status}</span><br>
-                                        <small class="text-muted">${new Date(booking.created_at).toLocaleString()}</small>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        `).join('')}
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
     
     function showErrorMessage(message) {
         errorMessage.textContent = message;
