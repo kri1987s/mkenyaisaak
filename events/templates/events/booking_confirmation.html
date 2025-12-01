@@ -20,7 +20,7 @@
 
                     <div class="alert alert-info text-start" role="alert">
                         <h4 class="alert-heading fw-bold"><i class="bi bi-credit-card me-2"></i>Payment Instructions</h4>
-                        <p>Please pay <strong>KES {{ booking.total_amount }}</strong> to complete your booking.</p>
+                        <p>Please pay <strong>KES {{ booking.total_amount }}</strong> to complete your payment.</p>
                         <hr>
                         {% if booking.tickets.first.ticket_type.event.payment_till_number %}
                             <div class="text-center mb-3">
