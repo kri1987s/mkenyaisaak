@@ -49,29 +49,41 @@ def mpesa_callback(request):
         data = json.loads(request.body)
         # Log the callback data
         print(f"M-Pesa Callback Data: {json.dumps(data, indent=2)}")
-        
+
         # Process the data
         stk_callback = data.get('Body', {}).get('stkCallback', {})
         result_code = stk_callback.get('ResultCode')
         checkout_request_id = stk_callback.get('CheckoutRequestID')
-        
+
+        # Extract M-Pesa receipt number from callback metadata if payment was successful
+        mpesa_receipt_number = None
+        if result_code == 0:  # Success
+            callback_metadata = stk_callback.get('CallbackMetadata', {})
+            items = callback_metadata.get('Item', [])
+            for item in items:
+                if item.get('Name') == 'TransactionID':
+                    mpesa_receipt_number = item.get('Value')
+                    break
+
         if checkout_request_id:
             from events.models import Booking
             try:
                 booking = Booking.objects.get(payment_reference=checkout_request_id)
-                
+
                 if result_code == 0:
                     booking.payment_status = 'PAID'
+                    if mpesa_receipt_number:
+                        booking.mpesa_receipt_number = mpesa_receipt_number
                     booking.save()
-                    print(f"Booking {booking.id} marked as PAID.")
+                    print(f"Booking {booking.id} marked as PAID with M-Pesa receipt: {mpesa_receipt_number}")
                 else:
                     booking.payment_status = 'FAILED'
                     booking.save()
                     print(f"Booking {booking.id} marked as FAILED. Reason: {stk_callback.get('ResultDesc')}")
-                    
+
             except Booking.DoesNotExist:
                 print(f"Booking with CheckoutRequestID {checkout_request_id} not found.")
-            
+
         return JsonResponse({"result": "ok"})
     except Exception as e:
         print(f"Error processing callback: {e}")

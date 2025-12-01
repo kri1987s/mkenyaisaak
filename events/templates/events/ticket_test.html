@@ -17,9 +17,10 @@
                 <a href="" class="btn btn-sm btn-success">
                     <i class="bi bi-check-circle-fill me-1"></i> I have paid
                 </a>
-                <a href="" class="btn btn-sm btn-outline-dark ms-2">
+                <button id="refresh-status-btn" class="btn btn-sm btn-outline-dark ms-2" onclick="refreshPaymentStatus()">
                     <i class="bi bi-arrow-clockwise me-1"></i> Refresh Status
-                </a>
+                </button>
+                <span id="status-message" class="ms-2"></span>
             </div>
         {% endif %}
     </div>
@@ -73,9 +74,16 @@
                             </div>
 
                             <div class="mb-2">
-                                <small class="text-muted d-block">M-Pesa Ref</small>
+                                <small class="text-muted d-block">M-Pesa Checkout Ref</small>
                                 <span class="font-monospace">{{ booking.payment_reference|default:"PENDING" }}</span>
                             </div>
+
+                            {% if booking.mpesa_receipt_number %}
+                            <div class="mb-2">
+                                <small class="text-muted d-block">M-Pesa Receipt</small>
+                                <span class="font-monospace text-success">{{ booking.mpesa_receipt_number }}</span>
+                            </div>
+                            {% endif %}
 
                             <div class="mt-2 text-end">
                                 <small class="text-muted">{{ booking.customer_phone }}</small>
@@ -99,6 +107,71 @@
         <a href="{% url 'events:event_detail' booking.tickets.first.ticket_type.event.id %}" class="btn btn-outline-secondary">Back to Event</a>
     </div>
 </div>
+
+<script>
+function refreshPaymentStatus() {
+    const refreshBtn = document.getElementById('refresh-status-btn');
+    const statusMessage = document.getElementById('status-message');
+
+    // Disable button and show loading state
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Checking...';
+    statusMessage.innerHTML = 'Checking status...';
+    statusMessage.className = 'ms-2 text-info';
+
+    // Get booking ID from the page context
+    const bookingId = '{{ booking.id }}';
+
+    // Make AJAX request to check payment status
+    fetch(`/events/api/payment-status/${bookingId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update the payment status on the page
+                const statusBadge = document.querySelector('.badge');
+                const statusText = document.querySelector('.alert small');
+
+                if (data.payment_status === 'PAID') {
+                    statusBadge.className = 'badge bg-success';
+                    statusMessage.innerHTML = 'Payment confirmed! Refreshing page...';
+                    statusMessage.className = 'ms-2 text-success';
+
+                    // Wait a moment then refresh the page to update the UI
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else if (data.payment_status === 'FAILED') {
+                    statusBadge.className = 'badge bg-danger';
+                    statusMessage.innerHTML = 'Payment failed. Please try again.';
+                    statusMessage.className = 'ms-2 text-danger';
+                } else {
+                    statusBadge.className = 'badge bg-warning text-dark';
+                    statusMessage.innerHTML = 'Payment still pending.';
+                    statusMessage.className = 'ms-2 text-warning';
+                }
+
+                // Update the status text
+                if (statusText) {
+                    statusText.textContent = data.payment_status;
+                }
+            } else {
+                throw new Error(data.message || 'Unknown error');
+            }
+        })
+        .catch(error => {
+            console.error('Error checking payment status:', error);
+            statusMessage.innerHTML = 'Error checking status. Please try again.';
+            statusMessage.className = 'ms-2 text-danger';
+        })
+        .finally(() => {
+            // Re-enable button after delay to show the result
+            setTimeout(() => {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Status';
+            }, 2000);
+        });
+}
+</script>
 
 <style>
 .ticket-card {

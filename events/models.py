@@ -42,7 +42,8 @@ class Booking(models.Model):
     customer_phone = models.CharField(max_length=20)  # Required field
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
-    payment_reference = models.CharField(max_length=100, blank=True, null=True) # M-Pesa code
+    payment_reference = models.CharField(max_length=100, blank=True, null=True) # M-Pesa CheckoutRequestID
+    mpesa_receipt_number = models.CharField(max_length=100, blank=True, null=True) # Actual M-Pesa transaction code
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
