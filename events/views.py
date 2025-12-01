@@ -127,14 +127,17 @@ def send_receipt_email(request, booking_id):
     if not email:
         return JsonResponse({'success': False, 'message': 'Email is required'})
 
-    # Update booking with the email if not already set
-    if not booking.customer_email:
-        booking.customer_email = email
-        booking.save()
+    # Update booking with the email provided in the form
+    original_email = booking.customer_email  # Store original email for comparison
+    booking.customer_email = email
+    booking.save()
 
     try:
         # Send the ticket confirmation email
         send_ticket_confirmation_email(booking)
-        return JsonResponse({'success': True, 'message': 'Receipt sent successfully!'})
+        return JsonResponse({'success': True, 'message': f'Receipt sent successfully to {email}!'})
     except Exception as e:
+        # Log the error for debugging
+        import logging
+        logging.exception(f"Failed to send email receipt to {email} for booking {booking_id}")
         return JsonResponse({'success': False, 'message': f'Failed to send email: {str(e)}'})

@@ -55,6 +55,11 @@
         </div>
     </div>
 
+    <!-- Hidden CSRF token for AJAX requests -->
+    <div style="display: none;">
+        {% csrf_token %}
+    </div>
+
     <div class="row justify-content-center">
         {% for ticket in booking.tickets.all %}
         <div class="col-md-8 mb-4">
@@ -275,8 +280,9 @@ function refreshPaymentStatus() {
         border-left: 5px solid #000 !important;
     }
 }
+</style>
 
-// Email receipt functionality
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('emailInput');
     const sendEmailBtn = document.getElementById('sendEmailBtn');
@@ -308,18 +314,34 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hide previous messages
             emailMessage.style.display = 'none';
 
+            // Get CSRF token with fallback method
+            const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfToken = csrfTokenElement ? csrfTokenElement.value : '';
+
+            // Set a timeout for the request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
             // Send AJAX request
             fetch('{% url "events:send_receipt_email" booking.id %}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({
                     email: email
-                })
+                }),
+                signal: controller.signal
             })
-            .then(response => response.json())
+            .then(response => {
+                clearTimeout(timeoutId); // Clear timeout on successful response
+                if (!response.ok) {
+                    // Handle HTTP error responses
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     showEmailMessage(data.message, 'success');
@@ -336,8 +358,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showEmailMessage('An error occurred while sending the email. Please try again.', 'danger');
+                clearTimeout(timeoutId); // Clear timeout on error
+                if (error.name === 'AbortError') {
+                    console.error('Request timeout:', error);
+                    showEmailMessage('Request timed out. The email might still be sent. Please check your inbox or try again.', 'warning');
+                } else {
+                    console.error('Error:', error);
+                    showEmailMessage('An error occurred while sending the email. Please try again.', 'danger');
+                }
             })
             .finally(() => {
                 // Restore button state

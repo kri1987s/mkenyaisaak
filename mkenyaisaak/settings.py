@@ -138,6 +138,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('smtp_server', default='smtp.zeptomail.com')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('USERNAME', default='emailapikey')
+EMAIL_HOST_PASSWORD = config('PASSWORD', default='')
+DEFAULT_FROM_EMAIL = 'Mkenya Isaak <hello@mkenyaisaak.co.ke>'
+
 # M-Pesa Configuration
 MPESA_ENVIRONMENT = config('MPESA_ENVIRONMENT', default='sandbox')
 
