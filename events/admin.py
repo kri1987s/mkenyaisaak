@@ -47,7 +47,7 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount')
         }),
         ('Payment Details', {
-            'fields': ('payment_status', 'mpesa_receipt_number', 'payment_reference')
+            'fields': ('payment_status', 'mpesa_receipt_number', 'mpesa_transaction_date', 'payment_reference')
         }),
         ('Audit', {
             'fields': ('created_at', 'updated_at'),
@@ -58,7 +58,10 @@ class BookingAdmin(admin.ModelAdmin):
     def payment_status_colored(self, obj):
         """Display payment status with visual indicators and M-Pesa receipt info"""
         if obj.mpesa_receipt_number:
-            return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number})"
+            if obj.mpesa_transaction_date:
+                return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number}) on {obj.mpesa_transaction_date}"
+            else:
+                return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number})"
         elif obj.payment_reference and obj.payment_status == 'PENDING':
             return f"⏳ PENDING (Ref: {obj.payment_reference[:8]}...)"
         elif obj.payment_status == 'FAILED':
@@ -77,7 +80,7 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('ticket_code', 'booking_customer_name', 'booking_phone', 'ticket_type', 'event_name', 'checked_in_at_gate1', 'checked_in_at_gate2', 'booking_status')
+    list_display = ('ticket_code', 'booking_customer_name', 'booking_email', 'booking_phone', 'ticket_type', 'event_name', 'mpesa_receipt_number', 'checked_in_at_gate1', 'checked_in_at_gate2', 'booking_status')
     search_fields = ('ticket_code', 'booking__customer_name', 'booking__customer_phone', 'booking__customer_email')
     list_filter = ('ticket_type__event', 'ticket_type', 'checked_in_at_gate1', 'checked_in_at_gate2', 'booking__payment_status')
     readonly_fields = ('created_at',)
@@ -85,6 +88,10 @@ class TicketAdmin(admin.ModelAdmin):
     def booking_customer_name(self, obj):
         return obj.booking.customer_name
     booking_customer_name.short_description = 'Customer Name'
+
+    def booking_email(self, obj):
+        return obj.booking.customer_email
+    booking_email.short_description = 'Customer Email'
 
     def booking_phone(self, obj):
         return obj.booking.customer_phone
@@ -97,6 +104,14 @@ class TicketAdmin(admin.ModelAdmin):
     def booking_status(self, obj):
         return obj.booking.payment_status
     booking_status.short_description = 'Payment Status'
+
+    def mpesa_receipt_number(self, obj):
+        receipt = obj.booking.mpesa_receipt_number
+        if receipt:
+            return f"🎯 {receipt}"
+        else:
+            return "❌ No receipt"
+    mpesa_receipt_number.short_description = 'M-Pesa Receipt'
 
     # Add fieldsets for better organization
     fieldsets = (

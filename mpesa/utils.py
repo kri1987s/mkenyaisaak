@@ -77,3 +77,40 @@ class MpesaClient:
             if response:
                 return response.json()
             return {"error": str(e)}
+
+    def query_transaction_status(self, checkout_request_id):
+        """
+        Query the status of an M-Pesa transaction using CheckoutRequestID
+        """
+        access_token = self.get_access_token()
+        if not access_token:
+            return {"error": "Failed to get access token"}
+
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        password_str = f"{self.shortcode}{self.passkey}{timestamp}"
+        password = base64.b64encode(password_str.encode()).decode()
+
+        url = f"{self.base_url}/mpesa/stkpushquery/v1/query"
+
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+
+        payload = {
+            "BusinessShortCode": self.shortcode,
+            "CheckoutRequestID": checkout_request_id,
+            "Timestamp": timestamp,
+            "Password": password
+        }
+
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error querying transaction status: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response Status: {e.response.status_code}")
+                print(f"Response Body: {e.response.text}")
+            return {"error": str(e)}

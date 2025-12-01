@@ -57,13 +57,15 @@ def mpesa_callback(request):
 
         # Extract M-Pesa receipt number from callback metadata if payment was successful
         mpesa_receipt_number = None
+        transaction_date = None
         if result_code == 0:  # Success
             callback_metadata = stk_callback.get('CallbackMetadata', {})
             items = callback_metadata.get('Item', [])
             for item in items:
-                if item.get('Name') == 'TransactionID':
+                if item.get('Name') == 'MpesaReceiptNumber':
                     mpesa_receipt_number = item.get('Value')
-                    break
+                elif item.get('Name') == 'TransactionDate':
+                    transaction_date = item.get('Value')
 
         if checkout_request_id:
             from events.models import Booking
@@ -74,13 +76,15 @@ def mpesa_callback(request):
                     booking.payment_status = 'PAID'
                     if mpesa_receipt_number:
                         booking.mpesa_receipt_number = mpesa_receipt_number
+                    if transaction_date:
+                        booking.mpesa_transaction_date = str(transaction_date)
                     booking.save()
 
                     # Send confirmation emails immediately after successful payment
                     from events.utils import send_ticket_confirmation_email, send_booking_notification_email
                     send_ticket_confirmation_email(booking)
                     send_booking_notification_email(booking)  # Send notification to organizer
-                    print(f"Booking {booking.id} marked as PAID with M-Pesa receipt: {mpesa_receipt_number}")
+                    print(f"Booking {booking.id} marked as PAID with M-Pesa receipt: {mpesa_receipt_number}, transaction date: {transaction_date}")
                 else:
                     booking.payment_status = 'FAILED'
                     booking.save()

@@ -187,7 +187,7 @@ function refreshPaymentStatus() {
                     
                     // Update the M-Pesa receipt number if available
                     if (data.mpesa_receipt_number) {
-                        document.querySelector('.font-monospace.text-success').innerHTML = data.mpesa_receipt_number;
+                        document.querySelector('.font-monospace').innerHTML = '<span class="text-success fw-bold">' + data.mpesa_receipt_number + '</span>';
                     }
                     
                     // Show print button
