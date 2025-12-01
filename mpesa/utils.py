@@ -81,6 +81,7 @@ class MpesaClient:
     def query_transaction_status(self, checkout_request_id):
         """
         Query the status of an M-Pesa transaction using CheckoutRequestID
+        This is for checking STK Push status by CheckoutRequestID
         """
         access_token = self.get_access_token()
         if not access_token:
@@ -109,8 +110,9 @@ class MpesaClient:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Error querying transaction status: {e}")
+            print(f"Error querying STK push transaction status: {e}")
             if hasattr(e, 'response') and e.response is not None:
                 print(f"Response Status: {e.response.status_code}")
                 print(f"Response Body: {e.response.text}")
             return {"error": str(e)}
+

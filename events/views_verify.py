@@ -39,9 +39,8 @@ def verify_ticket_direct(request):
             from mpesa.utils import MpesaClient
             from .utils import check_mpesa_transaction_status
 
-            # Try to query M-Pesa directly with the ticket_code to see if it's a valid M-Pesa receipt
+            # First, try treating the ticket_code as a CheckoutRequestID (original transaction ID)
             client = MpesaClient()
-            # First, try treating the ticket_code as a CheckoutRequestID
             mpesa_result = client.query_transaction_status(ticket_code)
 
             if 'error' not in mpesa_result:
@@ -58,29 +57,51 @@ def verify_ticket_direct(request):
                                 mpesa_receipt_number = item.get('Value')
                                 break
 
-                        # If the user entered the M-Pesa receipt number directly, try to find the corresponding booking
-                        # by querying all bookings with the same phone number and similar timestamp
-                        if mpesa_receipt_number == ticket_code:
-                            # User entered the actual M-Pesa receipt number
-                            # Try to find if there's any booking with a pending status that matches this receipt
-                            # by checking the original payment reference (CheckoutRequestID) from the response
-                            checkout_request_id = mpesa_result.get('CheckoutRequestID')
-                            if checkout_request_id:
-                                potential_booking = Booking.objects.filter(
-                                    payment_reference=checkout_request_id
-                                ).first()
+                        # If the user entered the original CheckoutRequestID
+                        checkout_request_id = mpesa_result.get('CheckoutRequestID')
+                        if checkout_request_id == ticket_code:
+                            # User entered the CheckoutRequestID
+                            potential_booking = Booking.objects.filter(
+                                payment_reference=checkout_request_id
+                            ).first()
 
-                                if potential_booking:
-                                    # Update the booking with the M-Pesa receipt number if not already set
-                                    if not potential_booking.mpesa_receipt_number:
-                                        potential_booking.mpesa_receipt_number = mpesa_receipt_number
-                                        potential_booking.payment_status = 'PAID'
-                                        potential_booking.save()
+                            if potential_booking:
+                                # Update the booking with the M-Pesa receipt number if not already set
+                                if not potential_booking.mpesa_receipt_number:
+                                    potential_booking.mpesa_receipt_number = mpesa_receipt_number
+                                    potential_booking.payment_status = 'PAID'
+                                    potential_booking.save()
 
-                                    return render(request, 'events/ticket_verification_success.html', {
-                                        'ticket': potential_booking.tickets.first(),  # Show first ticket
-                                        'booking': potential_booking
-                                    })
+                                return render(request, 'events/ticket_verification_success.html', {
+                                    'ticket': potential_booking.tickets.first(),  # Show first ticket
+                                    'booking': potential_booking
+                                })
+                        # If user entered the M-Pesa receipt number, try to find booking by receipt number in DB
+                        elif mpesa_receipt_number == ticket_code:
+                            # User entered the M-Pesa receipt number
+                            # Find the booking associated with this receipt number in DB
+                            # The booking might exist but have been missed in the original search
+                            booking_by_receipt = Booking.objects.filter(
+                                mpesa_receipt_number__iexact=ticket_code
+                            ).select_related('tickets__ticket_type__event').first()
+
+                            if booking_by_receipt and booking_by_receipt.payment_status == 'PAID':
+                                return render(request, 'events/ticket_verification_success.html', {
+                                    'ticket': booking_by_receipt.tickets.first(),  # Show first ticket
+                                    'booking': booking_by_receipt
+                                })
+
+            # If that didn't work, maybe the ticket_code is an M-Pesa receipt number that exists in our DB
+            # This is a fallback in case the receipt was already saved but search was case-sensitive
+            booking_fallback = Booking.objects.filter(
+                mpesa_receipt_number__iexact=ticket_code
+            ).select_related('tickets__ticket_type__event').first()
+
+            if booking_fallback and booking_fallback.payment_status == 'PAID':
+                return render(request, 'events/ticket_verification_success.html', {
+                    'ticket': booking_fallback.tickets.first(),  # Show first ticket
+                    'booking': booking_fallback
+                })
 
             # If still not found, show error
             return render(request, 'events/ticket_verification.html', {
@@ -158,7 +179,7 @@ def verify_ticket_from_event(request, event_id):
             from mpesa.utils import MpesaClient
             from .utils import check_mpesa_transaction_status
 
-            # Try to query M-Pesa directly with the ticket_code to see if it's a valid M-Pesa receipt
+            # First, try treating the ticket_code as a CheckoutRequestID (original transaction ID)
             client = MpesaClient()
             mpesa_result = client.query_transaction_status(ticket_code)
 
@@ -176,35 +197,75 @@ def verify_ticket_from_event(request, event_id):
                                 mpesa_receipt_number = item.get('Value')
                                 break
 
-                        # If the user entered the M-Pesa receipt number directly
-                        if mpesa_receipt_number == ticket_code:
-                            # User entered the actual M-Pesa receipt number
-                            checkout_request_id = mpesa_result.get('CheckoutRequestID')
-                            if checkout_request_id:
-                                potential_booking = Booking.objects.filter(
-                                    payment_reference=checkout_request_id,
-                                    tickets__ticket_type__event=event
-                                ).select_related('tickets__ticket_type__event').first()
+                        # If the user entered the original CheckoutRequestID
+                        checkout_request_id = mpesa_result.get('CheckoutRequestID')
+                        if checkout_request_id == ticket_code:
+                            # User entered the CheckoutRequestID
+                            potential_booking = Booking.objects.filter(
+                                payment_reference=checkout_request_id,
+                                tickets__ticket_type__event=event
+                            ).select_related('tickets__ticket_type__event').first()
 
-                                if potential_booking:
-                                    # Update the booking with the M-Pesa receipt number if not already set
-                                    if not potential_booking.mpesa_receipt_number:
-                                        potential_booking.mpesa_receipt_number = mpesa_receipt_number
-                                        potential_booking.payment_status = 'PAID'
-                                        potential_booking.save()
+                            if potential_booking:
+                                # Update the booking with the M-Pesa receipt number if not already set
+                                if not potential_booking.mpesa_receipt_number:
+                                    potential_booking.mpesa_receipt_number = mpesa_receipt_number
+                                    potential_booking.payment_status = 'PAID'
+                                    potential_booking.save()
 
-                                    return JsonResponse({
-                                        'status': 'success',
-                                        'ticket': {
-                                            'ticket_code': potential_booking.tickets.first().ticket_code if potential_booking.tickets.first() else 'N/A',
-                                            'customer_name': potential_booking.customer_name,
-                                            'customer_phone': potential_booking.customer_phone,
-                                            'ticket_type': potential_booking.tickets.first().ticket_type.name if potential_booking.tickets.first() else 'N/A',
-                                            'payment_status': potential_booking.payment_status,
-                                            'mpesa_receipt': potential_booking.mpesa_receipt_number,
-                                            'event_title': potential_booking.tickets.first().ticket_type.event.title if potential_booking.tickets.first() else 'N/A'
-                                        }
-                                    })
+                                return JsonResponse({
+                                    'status': 'success',
+                                    'ticket': {
+                                        'ticket_code': potential_booking.tickets.first().ticket_code if potential_booking.tickets.first() else 'N/A',
+                                        'customer_name': potential_booking.customer_name,
+                                        'customer_phone': potential_booking.customer_phone,
+                                        'ticket_type': potential_booking.tickets.first().ticket_type.name if potential_booking.tickets.first() else 'N/A',
+                                        'payment_status': potential_booking.payment_status,
+                                        'mpesa_receipt': potential_booking.mpesa_receipt_number,
+                                        'event_title': potential_booking.tickets.first().ticket_type.event.title if potential_booking.tickets.first() else 'N/A'
+                                    }
+                                })
+                        # If user entered the M-Pesa receipt number
+                        elif mpesa_receipt_number == ticket_code:
+                            # User entered the M-Pesa receipt number
+                            booking_by_receipt = Booking.objects.filter(
+                                mpesa_receipt_number__iexact=ticket_code,
+                                tickets__ticket_type__event=event
+                            ).select_related('tickets__ticket_type__event').first()
+
+                            if booking_by_receipt and booking_by_receipt.payment_status == 'PAID':
+                                return JsonResponse({
+                                    'status': 'success',
+                                    'ticket': {
+                                        'ticket_code': booking_by_receipt.tickets.first().ticket_code if booking_by_receipt.tickets.first() else 'N/A',
+                                        'customer_name': booking_by_receipt.customer_name,
+                                        'customer_phone': booking_by_receipt.customer_phone,
+                                        'ticket_type': booking_by_receipt.tickets.first().ticket_type.name if booking_by_receipt.tickets.first() else 'N/A',
+                                        'payment_status': booking_by_receipt.payment_status,
+                                        'mpesa_receipt': booking_by_receipt.mpesa_receipt_number,
+                                        'event_title': booking_by_receipt.tickets.first().ticket_type.event.title if booking_by_receipt.tickets.first() else 'N/A'
+                                    }
+                                })
+
+            # If that didn't work, maybe the ticket_code is an M-Pesa receipt number that exists in our DB
+            booking_fallback = Booking.objects.filter(
+                mpesa_receipt_number__iexact=ticket_code,
+                tickets__ticket_type__event=event
+            ).select_related('tickets__ticket_type__event').first()
+
+            if booking_fallback and booking_fallback.payment_status == 'PAID':
+                return JsonResponse({
+                    'status': 'success',
+                    'ticket': {
+                        'ticket_code': booking_fallback.tickets.first().ticket_code if booking_fallback.tickets.first() else 'N/A',
+                        'customer_name': booking_fallback.customer_name,
+                        'customer_phone': booking_fallback.customer_phone,
+                        'ticket_type': booking_fallback.tickets.first().ticket_type.name if booking_fallback.tickets.first() else 'N/A',
+                        'payment_status': booking_fallback.payment_status,
+                        'mpesa_receipt': booking_fallback.mpesa_receipt_number,
+                        'event_title': booking_fallback.tickets.first().ticket_type.event.title if booking_fallback.tickets.first() else 'N/A'
+                    }
+                })
 
             # If still not found
             return JsonResponse({'status': 'error', 'message': 'Ticket not found'})

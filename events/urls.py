@@ -25,4 +25,6 @@ urlpatterns = [
     path('api/verify-ticket/<str:gate_number>/', api.verify_ticket, name='api_verify_ticket'),
     path('api/payment-status/<uuid:booking_id>/', views_status.check_payment_status, name='check_payment_status'),
     path('api/payment-status-ref/', views_status.check_payment_status_by_reference, name='check_payment_status_by_reference'),
+    path('api/payment-status-receipt/', views_status.check_payment_status_by_receipt, name='check_payment_status_by_receipt'),
+    path('api/payment-status-phone/', views_status.check_payment_status_by_phone, name='check_payment_status_by_phone'),
 ]
