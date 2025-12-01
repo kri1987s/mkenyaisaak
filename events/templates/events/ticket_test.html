@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket: {{ booking.tickets.first.ticket_code }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle-fill me-2"></i> 
+        Payment Status: 
+        <span class="badge {% if booking.payment_status == 'PAID' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+            {{ booking.get_payment_status_display }}
+        </span>
+        {% if booking.payment_status != 'PAID' %}
+            <br>
+            <small>Please complete the M-Pesa payment on your phone. Refresh this page after payment.</small>
+        {% endif %}
+    </div>
+
+    <div class="row justify-content-center">
+        {% for ticket in booking.tickets.all %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0 ticket-card">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Event Image/Logo Section -->
+                        <div class="col-4 bg-dark text-white d-flex align-items-center justify-content-center p-3">
+                            {% if ticket.ticket_type.event.poster %}
+                                <img src="{{ ticket.ticket_type.event.poster.url }}" alt="Event Poster" class="img-fluid rounded">
+                            {% else %}
+                                <div class="text-center">
+                                    <i class="bi bi-calendar-event display-4"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Ticket Details Section -->
+                        <div class="col-8 p-3">
+                            <h5 class="card-title text-uppercase fw-bold mb-1">{{ ticket.ticket_type.event.title }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill me-1"></i> {{ ticket.ticket_type.event.venue }}<br>
+                                <i class="bi bi-clock-fill me-1"></i> {{ ticket.ticket_type.event.date|date:"D, d M Y H:i" }}
+                            </p>
+                            
+                            <hr class="my-2">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-primary">{{ ticket.ticket_type.name }}</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Admits</small>
+                                    <strong>
+                                        {% if "family" in ticket.ticket_type.name|lower %}
+                                            4 People
+                                        {% else %}
+                                            1 Person
+                                        {% endif %}
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Ticket Code</small>
+                                <code class="fs-5 fw-bold text-dark">{{ ticket.ticket_code }}</code>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted d-block">M-Pesa Ref</small>
+                                <span class="font-monospace">{{ booking.payment_reference|default:"PENDING" }}</span>
+                            </div>
+
+                            <div class="mt-2 text-end">
+                                <small class="text-muted">{{ booking.customer_phone }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Perforated Line Visual -->
+                <div class="card-footer bg-white border-top-0 position-relative" style="border-top: 2px dashed #ccc !important;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Mkenya Isaak 7 Million</small>
+                        <small class="text-muted">#{{ ticket.id }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'events:event_detail' booking.tickets.first.ticket_type.event.id %}" class="btn btn-outline-secondary">Back to Event</a>
+    </div>
+</div>
+
+<style>
+.ticket-card {
+    border-left: 5px solid #ffc107 !important; /* Gold accent */
+}
+</style>
+{% endblock %}

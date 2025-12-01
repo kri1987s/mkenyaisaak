@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, staff_views, api
+from . import views, staff_views, api, views_test
 
 app_name = 'events'
 
@@ -8,6 +8,10 @@ urlpatterns = [
     path('<int:pk>/', views.EventDetailView.as_view(), name='event_detail'),
     path('<int:event_id>/book/', views.BookingCreateView.as_view(), name='booking_create'),
     path('booking/<uuid:booking_id>/confirmation/', views.booking_confirmation, name='booking_confirmation'),
+    
+    # Test Views
+    path('<int:event_id>/book-test/', views_test.TestBookingCreateView.as_view(), name='book_test'),
+    path('ticket-test/<uuid:booking_id>/', views_test.test_ticket_view, name='test_ticket'),
     
     # Staff Views
     path('staff/', staff_views.StaffDashboardView.as_view(), name='staff_dashboard'),

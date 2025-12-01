@@ -137,3 +137,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# M-Pesa Configuration
+MPESA_ENVIRONMENT = config('MPESA_ENVIRONMENT', default='sandbox')
+
+if MPESA_ENVIRONMENT == 'production':
+    MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY_PROD')
+    MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET_PROD')
+    MPESA_PASSKEY = config('MPESA_PASSKEY_PROD')
+    MPESA_SHORTCODE = config('MPESA_SHORTCODE_PROD')
+    MPESA_BASE_URL = 'https://api.safaricom.co.ke'
+else:
+    MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY_SANDBOX')
+    MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET_SANDBOX')
+    MPESA_PASSKEY = config('MPESA_PASSKEY_SANDBOX')
+    MPESA_SHORTCODE = config('MPESA_SHORTCODE_SANDBOX')
+    MPESA_BASE_URL = 'https://sandbox.safaricom.co.ke'

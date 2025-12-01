@@ -1,20 +1,16 @@
 import requests
 import base64
 from datetime import datetime
-from decouple import config
+from django.conf import settings
 
 class MpesaClient:
     def __init__(self):
-        self.environment = config('MPESA_ENVIRONMENT', default='sandbox')
-        if self.environment == 'production':
-            self.base_url = 'https://api.safaricom.co.ke'
-        else:
-            self.base_url = 'https://sandbox.safaricom.co.ke'
-            
-        self.consumer_key = config('MPESA_CONSUMER_KEY')
-        self.consumer_secret = config('MPESA_CONSUMER_SECRET')
-        self.shortcode = config('MPESA_SHORTCODE')
-        self.passkey = config('MPESA_PASSKEY')
+        self.base_url = settings.MPESA_BASE_URL
+        self.consumer_key = settings.MPESA_CONSUMER_KEY
+        self.consumer_secret = settings.MPESA_CONSUMER_SECRET
+        self.shortcode = settings.MPESA_SHORTCODE
+        self.passkey = settings.MPESA_PASSKEY
+        self.environment = settings.MPESA_ENVIRONMENT
 
     def get_access_token(self):
         url = f"{self.base_url}/oauth/v1/generate?grant_type=client_credentials"
