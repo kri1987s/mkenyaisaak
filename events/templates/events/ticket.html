@@ -15,7 +15,7 @@
             <small>Please complete the M-Pesa payment on your phone.</small>
             <div class="mt-2">
                 <button id="refresh-status-btn" class="btn btn-sm btn-outline-dark ms-2" onclick="refreshPaymentStatus()">
-                    <i class="bi bi-arrow-clockwise me-1"></i> Refresh Status
+                    <i class="bi bi-arrow-clockwise me-1"></i> I have paid, refresh
                 </button>
                 <span id="status-message" class="ms-2"></span>
             </div>
@@ -185,8 +185,97 @@
         <a href="javascript:window.print()" class="btn btn-primary">
             <i class="bi bi-printer me-1"></i> Print Ticket
         </a>
+        {% else %}
+        <button id="refresh-status-btn-bottom" class="btn btn-success ms-2" onclick="refreshPaymentStatusBottom()">
+            <i class="bi bi-arrow-clockwise me-1"></i> I have paid, refresh
+        </button>
         {% endif %}
     </div>
+
+    <script>
+    function refreshPaymentStatusBottom() {
+        const refreshBtn = document.getElementById('refresh-status-btn-bottom');
+        const statusMessage = document.getElementById('status-message');
+
+        // Disable button and show loading state
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Checking...';
+        if (statusMessage) {
+            statusMessage.innerHTML = 'Checking status...';
+            statusMessage.className = 'ms-2 text-info';
+        }
+
+        // Get booking ID from the page context
+        const bookingId = '{{ booking.id }}';
+
+        // Make AJAX request to check payment status
+        fetch(`/events/api/payment-status/${bookingId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update the payment status on the page
+                    const statusBadge = document.querySelector('.badge');
+                    const alertMessage = document.querySelector('.alert small');
+
+                    if (data.payment_status === 'PAID') {
+                        statusBadge.className = 'badge bg-success';
+                        if (statusMessage) {
+                            statusMessage.innerHTML = 'Payment confirmed!';
+                            statusMessage.className = 'ms-2 text-success';
+                        }
+
+                        // Update the M-Pesa receipt number if available
+                        if (data.mpesa_receipt_number) {
+                            document.querySelector('.font-monospace').innerHTML = '<span class="text-success fw-bold">' + data.mpesa_receipt_number + '</span>';
+                        }
+
+                        // Replace bottom refresh button with print button and back to event
+                        if (refreshBtn) {
+                            refreshBtn.closest('.mt-4').innerHTML =
+                                '<a href="' + "{% url 'events:event_detail' booking.tickets.first.ticket_type.event.id %}" + '" class="btn btn-outline-secondary me-2">Back to Event</a>' +
+                                '<a href="javascript:window.print()" class="btn btn-primary">' +
+                                '<i class="bi bi-printer me-1"></i> Print Ticket</a>';
+                        }
+                    } else if (data.payment_status === 'FAILED') {
+                        statusBadge.className = 'badge bg-danger';
+                        if (statusMessage) {
+                            statusMessage.innerHTML = 'Payment failed. Please try again.';
+                            statusMessage.className = 'ms-2 text-danger';
+                        }
+                    } else {
+                        statusBadge.className = 'badge bg-warning text-dark';
+                        if (statusMessage) {
+                            statusMessage.innerHTML = 'Payment still pending.';
+                            statusMessage.className = 'ms-2 text-warning';
+                        }
+                    }
+
+                    // Update the status text
+                    if (alertMessage) {
+                        alertMessage.textContent = data.payment_status;
+                    }
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking payment status:', error);
+                if (statusMessage) {
+                    statusMessage.innerHTML = 'Error checking status. Please try again.';
+                    statusMessage.className = 'ms-2 text-danger';
+                }
+            })
+            .finally(() => {
+                // Re-enable button after delay to show the result
+                setTimeout(() => {
+                    if (refreshBtn && !refreshBtn.closest('.mt-4').innerHTML.includes('Print Ticket')) {
+                        refreshBtn.disabled = false;
+                        refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> I have paid, refresh';
+                    }
+                }, 2000);
+            });
+    }
+    </script>
 </div>
 
 <script>
@@ -253,7 +342,7 @@ function refreshPaymentStatus() {
             setTimeout(() => {
                 if (refreshBtn) {
                     refreshBtn.disabled = false;
-                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Status';
+                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> I have paid, refresh';
                 }
             }, 2000);
         });

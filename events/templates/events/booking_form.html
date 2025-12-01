@@ -71,13 +71,10 @@
                             </div>
                         {% endif %}
 
-                        {% if event.payment_till_number or event.payment_instructions %}
+                        {% if event.payment_instructions %}
                             <!-- Payment instructions -->
                             <div class="alert alert-info mb-4">
                                 <h5><i class="bi bi-credit-card me-2"></i>M-PESA Payment Instructions</h5>
-                                {% if event.payment_till_number %}
-                                    <p><strong>Pay to Till Number: {{ event.payment_till_number }}</strong></p>
-                                {% endif %}
                                 {% if event.payment_account_number %}
                                     <p><strong>Or Bank Account: {{ event.payment_account_number }}</strong></p>
                                 {% endif %}

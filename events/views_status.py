@@ -106,10 +106,11 @@ def check_payment_status_by_receipt(request):
             'updated_at': booking.updated_at.isoformat()
         })
     except Booking.DoesNotExist:
-        # If not found in DB, return appropriate error
+        # If the receipt number is not in our database, we can't verify it
+        # since we can't use the Transaction Status API due to Safaricom restrictions
         return JsonResponse({
             'status': 'error',
-            'message': 'Booking with this M-Pesa receipt number not found. Please check the receipt number and try again.'
+            'message': 'Booking with this M-Pesa receipt number not found. If you recently made payment, please wait a few minutes for the system to update, or contact support. Please check the receipt number and try again.'
         }, status=404)
     except Exception as e:
         return JsonResponse({

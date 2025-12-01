@@ -14,7 +14,7 @@ class BookingForm(forms.Form):
         for ticket_type in event.ticket_types.all():
             field_name = f"ticket_{ticket_type.id}"
             self.fields[field_name] = forms.IntegerField(
-                label=f"{ticket_type.name} (KES {ticket_type.price})",
+                label=f"{ticket_type.name}",
                 min_value=0,
                 max_value=10, # Limit max tickets per booking
                 initial=0,
