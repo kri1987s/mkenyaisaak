@@ -75,15 +75,25 @@
 
                             <div class="mb-2">
                                 <small class="text-muted d-block">M-Pesa Checkout Ref</small>
-                                <span class="font-monospace">{{ booking.payment_reference|default:"PENDING" }}</span>
+                                <span class="font-monospace">
+                                    {% if booking.payment_reference %}
+                                        <span class="text-info">{{ booking.payment_reference }}</span>
+                                    {% else %}
+                                        <span class="text-warning">PENDING</span>
+                                    {% endif %}
+                                </span>
                             </div>
 
-                            {% if booking.mpesa_receipt_number %}
                             <div class="mb-2">
                                 <small class="text-muted d-block">M-Pesa Receipt</small>
-                                <span class="font-monospace text-success">{{ booking.mpesa_receipt_number }}</span>
+                                <span class="font-monospace">
+                                    {% if booking.mpesa_receipt_number %}
+                                        <span class="text-success fw-bold">{{ booking.mpesa_receipt_number }}</span>
+                                    {% else %}
+                                        <span class="text-info">Not yet available</span>
+                                    {% endif %}
+                                </span>
                             </div>
-                            {% endif %}
 
                             <div class="mt-2 text-end">
                                 <small class="text-muted">{{ booking.customer_phone }}</small>

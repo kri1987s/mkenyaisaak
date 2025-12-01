@@ -14,18 +14,31 @@
                     </div>
                     
                     {% if response.ResponseCode == '0' %}
-                        <h3 class="card-title text-success">Check your phone!</h3>
+                        <h3 class="card-title text-success">Payment Initiated!</h3>
                         <p class="card-text lead">We've sent an M-Pesa payment request to <strong>{{ phone_number }}</strong>.</p>
-                        <p>Please enter your M-Pesa PIN to complete the transaction.</p>
-                        
+                        <p class="text-primary fw-bold">Please check your phone for an STK Push prompt.</p>
+                        <p class="text-secondary">Enter your M-Pesa PIN to complete the transaction.</p>
+                        <p class="text-info">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <small>Click "Refresh Status" after you've completed the payment to update your booking status.</small>
+                        </p>
+
                         <div class="alert alert-light border mt-4">
                             <small class="text-muted d-block text-start">Request ID:</small>
                             <code class="d-block text-start">{{ response.CheckoutRequestID }}</code>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{% url 'mpesa_initiate' %}" class="btn btn-outline-secondary me-2">Back to Payment</a>
+                            <a href="javascript:window.location.reload();" class="btn btn-primary">Refresh Status</a>
                         </div>
                     {% else %}
                         <h3 class="card-title text-danger">Something went wrong</h3>
                         <p class="card-text">{{ response.ResponseDescription|default:"Unknown error occurred." }}</p>
                         <p class="text-muted">Error Code: {{ response.ResponseCode }}</p>
+                        <div class="mt-4">
+                            <a href="{% url 'mpesa_initiate' %}" class="btn btn-outline-primary">Try Again</a>
+                        </div>
                     {% endif %}
                     
                     <div class="mt-4">

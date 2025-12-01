@@ -35,7 +35,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount', 'payment_status', 'payment_reference', 'mpesa_receipt_number', 'created_at')
+    list_display = ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount', 'payment_status_colored', 'mpesa_receipt_display', 'payment_reference', 'created_at')
     list_filter = ('payment_status', 'created_at', 'payment_reference', 'mpesa_receipt_number')
     search_fields = ('customer_name', 'customer_email', 'customer_phone', 'id', 'payment_reference', 'mpesa_receipt_number')
     readonly_fields = ('id', 'created_at', 'updated_at')
@@ -47,13 +47,33 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('id', 'customer_name', 'customer_email', 'customer_phone', 'total_amount')
         }),
         ('Payment Details', {
-            'fields': ('payment_status', 'payment_reference', 'mpesa_receipt_number')
+            'fields': ('payment_status', 'mpesa_receipt_number', 'payment_reference')
         }),
         ('Audit', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
+
+    def payment_status_colored(self, obj):
+        """Display payment status with visual indicators and M-Pesa receipt info"""
+        if obj.mpesa_receipt_number:
+            return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number})"
+        elif obj.payment_reference and obj.payment_status == 'PENDING':
+            return f"⏳ PENDING (Ref: {obj.payment_reference[:8]}...)"
+        elif obj.payment_status == 'FAILED':
+            return f"❌ {obj.payment_status}"
+        else:
+            return f"📋 {obj.payment_status}"
+    payment_status_colored.short_description = 'Payment Status'
+
+    def mpesa_receipt_display(self, obj):
+        """Display M-Pesa receipt with visual indicator if available"""
+        if obj.mpesa_receipt_number:
+            return f"🎯 {obj.mpesa_receipt_number}"
+        else:
+            return "❌ No receipt"
+    mpesa_receipt_display.short_description = 'M-Pesa Receipt (Ultimate Truth)'
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):

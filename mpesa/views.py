@@ -75,6 +75,11 @@ def mpesa_callback(request):
                     if mpesa_receipt_number:
                         booking.mpesa_receipt_number = mpesa_receipt_number
                     booking.save()
+
+                    # Send confirmation emails immediately after successful payment
+                    from events.utils import send_ticket_confirmation_email, send_booking_notification_email
+                    send_ticket_confirmation_email(booking)
+                    send_booking_notification_email(booking)  # Send notification to organizer
                     print(f"Booking {booking.id} marked as PAID with M-Pesa receipt: {mpesa_receipt_number}")
                 else:
                     booking.payment_status = 'FAILED'

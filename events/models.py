@@ -51,23 +51,23 @@ class Booking(models.Model):
 
     def save(self, *args, **kwargs):
         # Check if payment status changed to PAID, but only for existing bookings
-        if self.pk and not self._state.adding:  # Only for existing instances, not new ones
-            try:
-                old_booking = Booking.objects.get(pk=self.pk)
-                if old_booking.payment_status != 'PAID' and self.payment_status == 'PAID':
-                    from .utils import send_ticket_confirmation_email, send_booking_notification_email
-                    super().save(*args, **kwargs)
-                    send_ticket_confirmation_email(self)
-                    send_booking_notification_email(self)  # Send notification to organizer
-                    return
-            except Booking.DoesNotExist:
-                # This shouldn't normally happen if self.pk exists, but handle it gracefully
-                pass
-
+        # Note: Email sending is now handled in the M-Pesa callback view
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Booking {self.id} - {self.customer_name}"
+
+    @property
+    def has_mpesa_receipt(self):
+        """Check if this booking has an M-Pesa receipt number (the ultimate truth of payment)"""
+        return bool(self.mpesa_receipt_number)
+
+    @property
+    def payment_status_for_admin(self):
+        """Return payment status with additional information for admin"""
+        if self.mpesa_receipt_number:
+            return f"{self.payment_status} ({self.mpesa_receipt_number})"
+        return self.payment_status
 
 class Ticket(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='tickets')

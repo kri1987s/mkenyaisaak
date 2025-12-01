@@ -75,11 +75,15 @@
                                 <div class="col-md-6">
                                     <div class="mb-2">
                                         <small class="text-muted d-block">M-Pesa Receipt</small>
-                                        <span class="font-monospace text-success">
+                                        <span class="font-monospace">
                                             {% if booking.mpesa_receipt_number %}
-                                                {{ booking.mpesa_receipt_number }}
+                                                <span class="text-success fw-bold">{{ booking.mpesa_receipt_number }}</span>
                                             {% else %}
-                                                <span class="text-warning">PENDING</span>
+                                                {% if booking.payment_reference %}
+                                                    <span class="text-info">Processing... (Ref: {{ booking.payment_reference }})</span>
+                                                {% else %}
+                                                    <span class="text-warning">PENDING</span>
+                                                {% endif %}
                                             {% endif %}
                                         </span>
                                     </div>

@@ -2,9 +2,9 @@ from django import forms
 from .models import TicketType
 
 class BookingForm(forms.Form):
-    customer_name = forms.CharField(max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Full Name (Required)'}))
+    customer_name = forms.CharField(max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Full Name'}))
     customer_email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@example.com (Optional)'}))
-    customer_phone = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0712345678 (Required)'}))
+    customer_phone = forms.CharField(max_length=20, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0712345678'}))
 
     def __init__(self, *args, **kwargs):
         event = kwargs.pop('event')
