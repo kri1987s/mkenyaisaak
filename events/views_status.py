@@ -145,6 +145,15 @@ def check_payment_status_by_phone(request):
         # Find all bookings with this phone number (could be multiple)
         bookings = Booking.objects.filter(customer_phone__endswith=formatted_phone[-9:]).order_by('-created_at')  # Last 9 digits should match
 
+        # If no bookings found for this phone number
+        if not bookings.exists():
+            return JsonResponse({
+                'status': 'success',  # Return success but with empty groups
+                'booking_groups': {},
+                'total_bookings': 0,
+                'phone_number': formatted_phone
+            })
+
         # Check status for all pending bookings by querying M-Pesa
         for booking in bookings:
             if booking.payment_status == 'PENDING' and booking.payment_reference:
@@ -213,16 +222,18 @@ def check_payment_status_by_phone(request):
             'phone_number': formatted_phone
         })
 
-    # If no bookings found for this phone number
-    return JsonResponse({
-        'status': 'success',  // Return success but with empty groups
-        'booking_groups': {},
-        'total_bookings': 0,
-        'phone_number': formatted_phone
-    })
-
     except Exception as e:
         return JsonResponse({
             'status': 'error',
             'message': str(e)
         }, status=500)
+
+    # If no bookings found for this phone number (this is handled in the try block)
+    # If we reach here after the try-except (meaning no exception occurred but no bookings)
+    if not bookings:
+        return JsonResponse({
+            'status': 'success',  # Return success but with empty groups
+            'booking_groups': {},
+            'total_bookings': 0,
+            'phone_number': formatted_phone
+        })
