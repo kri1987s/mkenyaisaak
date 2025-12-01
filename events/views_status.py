@@ -165,6 +165,24 @@ def check_payment_status_by_phone(request):
             if first_ticket and first_ticket.ticket_type.event:
                 event_name = first_ticket.ticket_type.event.title
 
+            # Collect detailed ticket information
+            ticket_details = []
+            ticket_types = set()
+            total_admissions = 0
+
+            for ticket in booking.tickets.all():
+                ticket_details.append({
+                    'ticket_code': ticket.ticket_code,
+                    'ticket_type': ticket.ticket_type.name if ticket.ticket_type else 'Unknown',
+                    'admissions': 1  # Each ticket admits 1 person unless it's a family ticket
+                })
+                ticket_types.add(ticket.ticket_type.name if ticket.ticket_type else 'Unknown')
+                # For family tickets, adjust admissions count
+                if ticket.ticket_type and 'family' in ticket.ticket_type.name.lower():
+                    total_admissions += 4  # Family ticket admits 4 people
+                else:
+                    total_admissions += 1  # Regular ticket admits 1 person
+
             booking_info = {
                 'booking_id': str(booking.id),
                 'customer_name': booking.customer_name,
@@ -175,7 +193,10 @@ def check_payment_status_by_phone(request):
                 'created_at': booking.created_at.isoformat(),
                 'updated_at': booking.updated_at.isoformat(),
                 'ticket_count': booking.tickets.count(),
-                'ticket_codes': [ticket.ticket_code for ticket in booking.tickets.all()]
+                'ticket_codes': [ticket.ticket_code for ticket in booking.tickets.all()],
+                'ticket_types': list(ticket_types),
+                'ticket_details': ticket_details,
+                'admissions': total_admissions
             }
 
             bookings_by_event[event_name].append(booking_info)

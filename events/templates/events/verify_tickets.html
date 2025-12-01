@@ -240,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <p class="card-text">
                                 <strong>Ticket${booking.ticket_count > 1 ? 's' : ''}:</strong> ${booking.ticket_codes.join(', ')}<br>
-                                <strong>Qty:</strong> ${booking.ticket_count}<br>
+                                <strong>Type${booking.ticket_types.length > 1 ? 's' : ''}:</strong> ${booking.ticket_types.join(', ')}<br>
+                                <strong>Admits:</strong> ${booking.admissions} ${booking.admissions > 1 ? 'people' : 'person'}<br>
                                 <strong>Amount:</strong> KES ${booking.total_amount}<br>
                                 ${booking.mpesa_receipt_number ? `<strong>Receipt:</strong> ${booking.mpesa_receipt_number}<br>` : ''}
                                 <small class="text-muted">Purchased: ${new Date(booking.created_at).toLocaleString()}</small>
