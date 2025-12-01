@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Server Error - Mkenya Isaak 7 Million{% endblock %}
+
+{% block content %}
+<!-- Error Section -->
+<section class="hero-section d-flex align-items-center text-center bg-dark text-white position-relative overflow-hidden" style="min-height: 80vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/media/hero_bg.jpg') center/cover no-repeat;">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-8 text-center">
+                <!-- Error Code -->
+                <div class="error-code mb-4">
+                    <h1 class="display-1 fw-bold text-warning">500</h1>
+                    <h2 class="display-4 fw-bold text-white mb-4">Server Error</h2>
+                </div>
+
+                <!-- Mkenya Isaak Image -->
+                <div class="hero-image-container mb-4">
+                    <div class="bg-white p-2 rounded-circle shadow-lg d-inline-block position-relative z-2" style="width: 200px; height: 200px; overflow: hidden;">
+                        <img src="/media/mkenya_isaak_face.jpg" alt="Mkenya Isaak" class="img-fluid rounded-circle" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message mb-4">
+                    <p class="lead text-white">
+                        Oops! We're experiencing some technical difficulties on our end.
+                    </p>
+                    <p class="text-light">
+                        Our team has been notified and is working to resolve this issue.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                    <a href="{% url 'core:home' %}" class="btn btn-warning btn-lg px-4 fw-bold shadow-lg rounded-pill">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                    <a href="mailto:hello@mkenyaisaak.co.ke" class="btn btn-outline-light btn-lg px-4 fw-bold rounded-pill">
+                        <i class="fas fa-envelope me-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Info Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h3 class="fw-bold mb-4">What happened?</h3>
+                <p class="mb-4">
+                    A 500 error indicates that something went wrong on our server. Don't worry, this is not your fault.
+                    We track these errors automatically and our team will work on fixing this as soon as possible.
+                </p>
+                <p class="mb-0 text-muted">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    The page will automatically refresh when the issue is resolved.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

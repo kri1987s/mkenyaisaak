@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bad Request - Mkenya Isaak 7 Million{% endblock %}
+
+{% block content %}
+<!-- Error Section -->
+<section class="hero-section d-flex align-items-center text-center bg-dark text-white position-relative overflow-hidden" style="min-height: 80vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/media/hero_bg.jpg') center/cover no-repeat;">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-8 text-center">
+                <!-- Error Code -->
+                <div class="error-code mb-4">
+                    <h1 class="display-1 fw-bold text-warning">400</h1>
+                    <h2 class="display-4 fw-bold text-white mb-4">Bad Request</h2>
+                </div>
+
+                <!-- Mkenya Isaak Image -->
+                <div class="hero-image-container mb-4">
+                    <div class="bg-white p-2 rounded-circle shadow-lg d-inline-block position-relative z-2" style="width: 200px; height: 200px; overflow: hidden;">
+                        <img src="/media/mkenya_isaak_face.jpg" alt="Mkenya Isaak" class="img-fluid rounded-circle" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message mb-4">
+                    <p class="lead text-white">
+                        It seems the request you made is not valid or contains incorrect parameters.
+                    </p>
+                    <p class="text-light">
+                        Please check your request and try again, or contact support if the problem persists.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                    <a href="{% url 'core:home' %}" class="btn btn-warning btn-lg px-4 fw-bold shadow-lg rounded-pill">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                    <a href="mailto:hello@mkenyaisaak.co.ke" class="btn btn-outline-light btn-lg px-4 fw-bold rounded-pill">
+                        <i class="fas fa-envelope me-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Info Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h3 class="fw-bold mb-4">What happened?</h3>
+                <p class="mb-4">
+                    A 400 error occurs when a request cannot be processed due to client-side errors in the request syntax.
+                    This could be due to malformed request parameters or invalid data submitted.
+                </p>
+                <p class="mb-0 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Please verify your input and try again, or contact us if you continue to experience issues.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
