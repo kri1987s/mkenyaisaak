@@ -11,6 +11,7 @@ class MpesaClient:
         self.shortcode = settings.MPESA_SHORTCODE
         self.passkey = settings.MPESA_PASSKEY
         self.environment = settings.MPESA_ENVIRONMENT
+        self.till_number = getattr(settings, 'MPESA_TILL_NUMBER', None)
 
     def get_access_token(self):
         url = f"{self.base_url}/oauth/v1/generate?grant_type=client_credentials"
@@ -48,6 +49,11 @@ class MpesaClient:
             'Content-Type': 'application/json'
         }
         
+        # Determine PartyB (Destination)
+        # For PayBill, PartyB is the Shortcode.
+        # For Buy Goods, PartyB is the Till Number.
+        party_b = self.till_number if self.till_number else self.shortcode
+        
         payload = {
             "BusinessShortCode": self.shortcode,
             "Password": password,
@@ -55,7 +61,7 @@ class MpesaClient:
             "TransactionType": "CustomerBuyGoodsOnline",
             "Amount": amount,
             "PartyA": phone_number,
-            "PartyB": self.shortcode,
+            "PartyB": party_b,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
             "AccountReference": account_reference,
