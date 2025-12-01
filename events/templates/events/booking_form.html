@@ -71,10 +71,10 @@
                             </div>
                         {% endif %}
 
-                        <!-- Payment instructions -->
                         {% if event.payment_till_number or event.payment_instructions %}
+                            <!-- Payment instructions -->
                             <div class="alert alert-info mb-4">
-                                <h5><i class="bi bi-credit-card me-2"></i>Payment Instructions</h5>
+                                <h5><i class="bi bi-credit-card me-2"></i>M-PESA Payment Instructions</h5>
                                 {% if event.payment_till_number %}
                                     <p><strong>Pay to Till Number: {{ event.payment_till_number }}</strong></p>
                                 {% endif %}
@@ -84,7 +84,11 @@
                                 {% if event.payment_instructions %}
                                     <p>{{ event.payment_instructions|linebreaks }}</p>
                                 {% endif %}
-                                <p class="text-dark">After payment, please save your transaction ID for confirmation.</p>
+                                <p class="text-dark">
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    Select number of tickets and type above, click "Buy Ticket Now", then go to your phone's M-Pesa menu to complete payment when prompted.
+                                    After paying, wait for the M-Pesa SMS confirmation. <strong>That SMS is your ticket.</strong>
+                                </p>
                             </div>
                         {% endif %}
 

@@ -4,6 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .models import Ticket, Booking
 
+@require_http_methods(["GET"])
+def verify_tickets_page(request):
+    """
+    Page where users can verify their tickets using various methods
+    """
+    return render(request, 'events/verify_tickets.html')
+
 @require_http_methods(["GET", "POST"])
 def verify_ticket_direct(request):
     """
@@ -11,30 +18,30 @@ def verify_ticket_direct(request):
     """
     if request.method == 'POST':
         ticket_code = request.POST.get('ticket_code', '').strip().upper()
-        
+
         if ticket_code:
             # First try to find by ticket code
             ticket = Ticket.objects.filter(ticket_code=ticket_code).select_related(
                 'booking', 'ticket_type__event'
             ).first()
-            
+
             if ticket:
                 return render(request, 'events/ticket_verification_success.html', {
                     'ticket': ticket,
                     'booking': ticket.booking
                 })
-            
+
             # If ticket code not found, try to find by M-Pesa receipt number
             booking = Booking.objects.filter(
                 mpesa_receipt_number__iexact=ticket_code
             ).select_related('tickets__ticket_type__event').first()
-            
+
             if booking and booking.payment_status == 'PAID':
                 return render(request, 'events/ticket_verification_success.html', {
                     'ticket': booking.tickets.first(),  # Show first ticket
                     'booking': booking
                 })
-            
+
             # If not found in DB, try to verify via M-Pesa API (in case callback was missed)
             from mpesa.utils import MpesaClient
             from .utils import check_mpesa_transaction_status
@@ -108,12 +115,12 @@ def verify_ticket_direct(request):
                 'error_message': 'Ticket not found. Please check your M-Pesa code and try again.',
                 'ticket_code': ticket_code
             })
-        
+
         else:
             return render(request, 'events/ticket_verification.html', {
                 'error_message': 'Please enter a ticket code or M-Pesa receipt number.'
             })
-    
+
     # GET request - show the verification form
     return render(request, 'events/ticket_verification.html')
 

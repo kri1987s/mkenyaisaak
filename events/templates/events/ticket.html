@@ -8,7 +8,7 @@
         <i class="bi bi-info-circle-fill me-2"></i>
         Payment Status:
         <span class="badge {% if booking.payment_status == 'PAID' %}bg-success{% else %}bg-warning text-dark{% endif %}">
-            {{ booking.get_payment_status_display }}
+            {{ booking.payment_status }}
         </span>
         {% if booking.payment_status != 'PAID' %}
             <br>
@@ -21,11 +21,38 @@
             </div>
         {% else %}
             <div class="mt-2">
-                <a href="javascript:window.print()" class="btn btn-sm btn-primary">
+                <a href="javascript:window.print()" class="btn btn-sm btn-primary me-2">
                     <i class="bi bi-printer me-1"></i> Print Ticket
                 </a>
+                {% if not booking.customer_email %}
+                    <!-- Button to show email form -->
+                    <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#emailForm" aria-expanded="false" aria-controls="emailForm">
+                        <i class="bi bi-envelope me-1"></i> Email Receipt
+                    </button>
+                {% else %}
+                    <span class="text-success small">✓ Receipt sent to {{ booking.customer_email }}</span>
+                {% endif %}
             </div>
         {% endif %}
+    </div>
+
+    <!-- Email Form Section (Initially Hidden) -->
+    <div class="collapse mt-3" id="emailForm">
+        <div class="card card-body bg-light">
+            <h6 class="mb-3">Send Receipt to Email</h6>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" id="emailInput" placeholder="Enter your email address">
+                        <button class="btn btn-success" type="button" id="sendEmailBtn">
+                            <span id="sendEmailText">Send Receipt</span>
+                            <span id="sendEmailSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        </button>
+                    </div>
+                    <div id="emailMessage" class="mt-2" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row justify-content-center">
@@ -248,5 +275,95 @@ function refreshPaymentStatus() {
         border-left: 5px solid #000 !important;
     }
 }
-</style>
+
+// Email receipt functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('emailInput');
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+    const sendEmailText = document.getElementById('sendEmailText');
+    const sendEmailSpinner = document.getElementById('sendEmailSpinner');
+    const emailMessage = document.getElementById('emailMessage');
+
+    if (sendEmailBtn) {
+        sendEmailBtn.addEventListener('click', function() {
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                showEmailMessage('Please enter an email address.', 'danger');
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showEmailMessage('Please enter a valid email address.', 'danger');
+                return;
+            }
+
+            // Show loading state
+            sendEmailBtn.disabled = true;
+            sendEmailSpinner.classList.remove('d-none');
+            sendEmailText.textContent = 'Sending...';
+
+            // Hide previous messages
+            emailMessage.style.display = 'none';
+
+            // Send AJAX request
+            fetch('{% url "events:send_receipt_email" booking.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showEmailMessage(data.message, 'success');
+                    // Add success email to the top info bar
+                    document.querySelector('.alert-info .mt-2').innerHTML +=
+                        '<span class="text-success small ms-2">✓ Receipt sent to ' + email + '</span>';
+                    // Hide the email form and button
+                    const emailForm = document.getElementById('emailForm');
+                    const emailBtn = document.querySelector('[data-bs-target="#emailForm"]');
+                    if (emailForm) emailForm.classList.remove('show');
+                    if (emailBtn) emailBtn.style.display = 'none';
+                } else {
+                    showEmailMessage(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showEmailMessage('An error occurred while sending the email. Please try again.', 'danger');
+            })
+            .finally(() => {
+                // Restore button state
+                sendEmailBtn.disabled = false;
+                sendEmailSpinner.classList.add('d-none');
+                sendEmailText.textContent = 'Send Receipt';
+            });
+        });
+    }
+
+    function showEmailMessage(message, type) {
+        emailMessage.innerHTML = '<div class="alert alert-' + type + ' mb-0">' + message + '</div>';
+        emailMessage.style.display = 'block';
+
+        // Scroll to message
+        emailMessage.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Allow Enter key to trigger email sending
+    if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendEmailBtn.click();
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

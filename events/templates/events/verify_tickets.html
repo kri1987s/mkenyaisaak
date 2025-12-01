@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Tickets - Mkenya Isaak 7 Million{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-4 text-center">
+                    <h2 class="h4 mb-0">Ticket Verification</h2>
+                    <p class="mb-0">Check your ticket status using your phone number or M-Pesa receipt</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="verify-ticket-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="verification_method" class="form-label fw-bold">How do you want to verify?</label>
+                            <select class="form-select" id="verification_method" required>
+                                <option value="">Select verification method</option>
+                                <option value="phone">By Phone Number (recommended)</option>
+                                <option value="receipt">By M-Pesa Receipt Number</option>
+                                <option value="booking">By Booking ID</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4" id="phone-input" style="display: none;">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone_number" placeholder="Enter phone number (e.g., 0712345678)">
+                            <div class="form-text">Enter the phone number you used to make the payment</div>
+                        </div>
+                        
+                        <div class="mb-4" id="receipt-input" style="display: none;">
+                            <label for="receipt_number" class="form-label">M-Pesa Receipt Number</label>
+                            <input type="text" class="form-control" id="receipt_number" placeholder="Enter M-Pesa receipt number (e.g., QFG34KJ8U1)">
+                            <div class="form-text">This is the code you received in your M-Pesa SMS confirmation</div>
+                        </div>
+                        
+                        <div class="mb-4" id="booking-input" style="display: none;">
+                            <label for="booking_id" class="form-label">Booking ID</label>
+                            <input type="text" class="form-control" id="booking_id" placeholder="Enter booking ID">
+                            <div class="form-text">This is the booking reference you received after payment</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="verify-btn">
+                                <span id="verify-btn-text">Verify Tickets</span>
+                                <span id="verify-btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                            <a href="{% url 'events:event_list' %}" class="btn btn-outline-secondary">Back to Events</a>
+                        </div>
+                    </form>
+                    
+                    <div id="result-container" class="mt-4" style="display: none;">
+                        <div class="alert alert-success">
+                            <h5 class="alert-heading">Verification Successful!</h5>
+                            <p id="result-message"></p>
+                        </div>
+                        
+                        <div id="booking-details" class="mt-3">
+                            <!-- Booking details will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div id="error-container" class="mt-4" style="display: none;">
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">Verification Failed!</h5>
+                            <p id="error-message"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const verifyForm = document.getElementById('verify-ticket-form');
+    const verifyBtn = document.getElementById('verify-btn');
+    const verifyBtnText = document.getElementById('verify-btn-text');
+    const verifyBtnSpinner = document.getElementById('verify-btn-spinner');
+    const verifyMethodSelect = document.getElementById('verification_method');
+    const phoneInput = document.getElementById('phone-input');
+    const receiptInput = document.getElementById('receipt-input');
+    const bookingInput = document.getElementById('booking-input');
+    const resultContainer = document.getElementById('result-container');
+    const errorContainer = document.getElementById('error-container');
+    const resultMessage = document.getElementById('result-message');
+    const errorMessage = document.getElementById('error-message');
+
+    // Show/hide input fields based on verification method
+    verifyMethodSelect.addEventListener('change', function() {
+        phoneInput.style.display = 'none';
+        receiptInput.style.display = 'none';
+        bookingInput.style.display = 'none';
+        
+        const method = this.value;
+        if (method === 'phone') {
+            phoneInput.style.display = 'block';
+        } else if (method === 'receipt') {
+            receiptInput.style.display = 'block';
+        } else if (method === 'booking') {
+            bookingInput.style.display = 'block';
+        }
+    });
+
+    // Handle form submission
+    verifyForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const method = verifyMethodSelect.value;
+        let verificationValue = '';
+        
+        if (!method) {
+            showErrorMessage('Please select a verification method');
+            return;
+        }
+        
+        if (method === 'phone') {
+            verificationValue = document.getElementById('phone_number').value;
+            if (!verificationValue) {
+                showErrorMessage('Please enter your phone number');
+                return;
+            }
+        } else if (method === 'receipt') {
+            verificationValue = document.getElementById('receipt_number').value;
+            if (!verificationValue) {
+                showErrorMessage('Please enter your M-Pesa receipt number');
+                return;
+            }
+        } else if (method === 'booking') {
+            verificationValue = document.getElementById('booking_id').value;
+            if (!verificationValue) {
+                showErrorMessage('Please enter your booking ID');
+                return;
+            }
+        }
+        
+        performVerification(method, verificationValue);
+    });
+    
+    function performVerification(method, value) {
+        // Show loading state
+        verifyBtn.disabled = true;
+        verifyBtnSpinner.classList.remove('d-none');
+        verifyBtnText.textContent = 'Verifying...';
+        
+        // Hide previous results
+        resultContainer.style.display = 'none';
+        errorContainer.style.display = 'none';
+        
+        let url = '';
+        let params = new URLSearchParams();
+        
+        if (method === 'phone') {
+            url = '{% url "events:check_payment_status_by_phone" %}';
+            params.append('phone', value);
+        } else if (method === 'receipt') {
+            url = '{% url "events:check_payment_status_by_receipt" %}';
+            params.append('receipt', value);
+        } else if (method === 'booking') {
+            url = `{% url "events:check_payment_status" "REPLACE_ID" %}`.replace('REPLACE_ID', value);
+        }
+        
+        if (method !== 'booking') {
+            url += '?' + params.toString();
+        }
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(data);
+                } else if (data.status === 'partial_success') {
+                    showPartialSuccess(data);
+                } else {
+                    showErrorMessage(data.message || 'Verification failed');
+                }
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+                showErrorMessage('An error occurred while verifying tickets. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                verifyBtn.disabled = false;
+                verifyBtnSpinner.classList.add('d-none');
+                verifyBtnText.textContent = 'Verify Tickets';
+            });
+    }
+    
+    function showSuccess(data) {
+        resultMessage.innerHTML = `
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            Your ticket is confirmed! Payment status: <strong>${data.payment_status}</strong>.
+            ${data.mpesa_receipt_number ? `M-Pesa Receipt: <strong>${data.mpesa_receipt_number}</strong>` : ''}
+        `;
+        resultContainer.style.display = 'block';
+        errorContainer.style.display = 'none';
+        
+        // Build booking details
+        const bookingDetails = document.getElementById('booking-details');
+        bookingDetails.innerHTML = `
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title">Booking Details</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Booking ID</div>
+                                <code>${data.booking_id}</code>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Payment Status</div>
+                                <span class="badge bg-success">${data.payment_status}</span>
+                            </div>
+                        </li>
+                        ${data.mpesa_receipt_number ? `
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">M-Pesa Receipt</div>
+                                <span class="text-success">${data.mpesa_receipt_number}</span>
+                            </div>
+                        </li>
+                        ` : ''}
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Amount</div>
+                                KES ${data.total_amount}
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Date Updated</div>
+                                ${new Date(data.updated_at).toLocaleString()}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    function showPartialSuccess(data) {
+        resultMessage.innerHTML = `
+            <i class="bi bi-info-circle-fill text-info me-2"></i>
+            Found bookings associated with your phone number. ${data.payment_status === 'PENDING' ? 'Payment status is still pending.' : 'Some bookings may require additional verification.'}
+        `;
+        resultContainer.style.display = 'block';
+        errorContainer.style.display = 'none';
+        
+        // Build booking details
+        const bookingDetails = document.getElementById('booking-details');
+        bookingDetails.innerHTML = `
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title">Booking Details</h5>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Your payment status is still pending. Checking with M-Pesa...
+                    </div>
+                    ${data.all_pending_bookings ? `
+                    <h6>Pending Bookings:</h6>
+                    <ul class="list-group">
+                        ${data.all_pending_bookings.map(booking => `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>Booking:</strong> ${booking.booking_id}<br>
+                                    <strong>Amount:</strong> KES ${booking.total_amount}<br>
+                                    <strong>Date:</strong> ${new Date(booking.created_at).toLocaleString()}
+                                </div>
+                                <div>
+                                    <span class="badge bg-warning">${booking.payment_status}</span>
+                                </div>
+                            </div>
+                        </li>
+                        `).join('')}
+                    </ul>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    function showErrorMessage(message) {
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block';
+        resultContainer.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

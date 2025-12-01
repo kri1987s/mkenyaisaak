@@ -57,17 +57,27 @@ class BookingAdmin(admin.ModelAdmin):
 
     def payment_status_colored(self, obj):
         """Display payment status with visual indicators and M-Pesa receipt info"""
+        status_icon = ""
+        if obj.payment_status == 'PAID':
+            status_icon = "✅"
+        elif obj.payment_status == 'PENDING':
+            status_icon = "⏳"
+        elif obj.payment_status == 'FAILED':
+            status_icon = "❌"
+        else:
+            status_icon = "📋"
+
+        base_status = f"{status_icon} {obj.payment_status}"
+
         if obj.mpesa_receipt_number:
             if obj.mpesa_transaction_date:
-                return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number}) on {obj.mpesa_transaction_date}"
+                return f"{base_status} ({obj.mpesa_receipt_number}) on {obj.mpesa_transaction_date}"
             else:
-                return f"✅ {obj.payment_status} ({obj.mpesa_receipt_number})"
+                return f"{base_status} ({obj.mpesa_receipt_number})"
         elif obj.payment_reference and obj.payment_status == 'PENDING':
             return f"⏳ PENDING (Ref: {obj.payment_reference[:8]}...)"
-        elif obj.payment_status == 'FAILED':
-            return f"❌ {obj.payment_status}"
         else:
-            return f"📋 {obj.payment_status}"
+            return base_status
     payment_status_colored.short_description = 'Payment Status'
 
     def mpesa_receipt_display(self, obj):

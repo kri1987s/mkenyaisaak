@@ -2,9 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .models import Event, Booking, Ticket, TicketType
 from .forms import BookingForm
 from mpesa.utils import MpesaClient
+from .utils import send_ticket_confirmation_email
 import uuid
 
 class EventListView(ListView):
@@ -109,3 +113,28 @@ class BookingCreateView(View):
 def booking_confirmation(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
     return render(request, 'events/booking_confirmation.html', {'booking': booking})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def send_receipt_email(request, booking_id):
+    """Send receipt to email for a specific booking"""
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    import json
+    data = json.loads(request.body)
+    email = data.get('email', '').strip()
+
+    if not email:
+        return JsonResponse({'success': False, 'message': 'Email is required'})
+
+    # Update booking with the email if not already set
+    if not booking.customer_email:
+        booking.customer_email = email
+        booking.save()
+
+    try:
+        # Send the ticket confirmation email
+        send_ticket_confirmation_email(booking)
+        return JsonResponse({'success': True, 'message': 'Receipt sent successfully!'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Failed to send email: {str(e)}'})

@@ -8,8 +8,10 @@ urlpatterns = [
     path('<int:pk>/', views.EventDetailView.as_view(), name='event_detail'),
     path('<int:event_id>/book/', views.BookingCreateView.as_view(), name='booking_create'),
     path('booking/<uuid:booking_id>/confirmation/', views.booking_confirmation, name='booking_confirmation'),
+    path('booking/<uuid:booking_id>/send-receipt/', views.send_receipt_email, name='send_receipt_email'),
     path('ticket/<uuid:booking_id>/', views_ticket.ticket_view, name='ticket_view'),
     path('verify-ticket/', views_verify.verify_ticket_direct, name='verify_ticket_direct'),
+    path('verify-tickets/', views_verify.verify_tickets_page, name='verify_tickets_page'),
     path('event/<int:event_id>/verify/', views_verify.verify_ticket_from_event, name='verify_ticket_from_event'),
 
     # Staff Views

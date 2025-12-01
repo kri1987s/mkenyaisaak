@@ -65,7 +65,8 @@
                             <div class="display-6 fw-bold text-center my-3">{{ event.payment_till_number }}</div>
                             <p class="mb-0 small text-center text-muted">
                                 <i class="bi bi-info-circle me-1"></i>
-                                After paying, wait for the M-Pesa SMS. <strong>That SMS is your ticket.</strong>
+                                Select number of tickets, click "Buy Ticket Now", then pay via your phone's M-Pesa menu when prompted.
+                                After paying, wait for the M-Pesa SMS confirmation. <strong>That SMS is your ticket.</strong>
                             </p>
                         </div>
                     {% endif %}
@@ -79,20 +80,13 @@
                         {% endfor %}
                     </ul>
                     <a href="{% url 'events:booking_create' event.id %}" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm mb-3">
-                        <i class="bi bi-ticket-perforated me-2"></i>Buy Ticket
+                        <i class="bi bi-ticket-perforated me-2"></i>Buy Ticket Now
                     </a>
 
-                    <!-- Verify Ticket Section -->
-                    <div class="card bg-light border-0 p-3">
-                        <h4 class="h5 fw-bold mb-3 text-center">Verify Ticket</h4>
-                        <p class="text-center mb-3">Enter your ticket code or M-Pesa receipt to verify</p>
-
-                        <div class="input-group mb-2">
-                            <input type="text" class="form-control" id="verify-ticket-input" placeholder="Ticket code or M-Pesa receipt">
-                            <button class="btn btn-success" type="button" id="verify-ticket-btn">Verify</button>
-                        </div>
-
-                        <div id="verify-ticket-result" class="mt-3" style="display: none;"></div>
+                    <div class="text-center">
+                        <a href="{% url 'events:verify_tickets_page' %}" class="btn btn-outline-primary btn-sm">
+                            Already bought tickets? <strong>Verify Now</strong>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -100,79 +94,11 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const verifyBtn = document.getElementById('verify-ticket-btn');
-    const verifyInput = document.getElementById('verify-ticket-input');
-    const verifyResult = document.getElementById('verify-ticket-result');
+<!-- Removed old ticket verification section -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    if (verifyBtn) {
-        verifyBtn.addEventListener('click', function() {
-            const ticketCode = verifyInput.value.trim();
-
-            if (!ticketCode) {
-                showVerificationResult('Please enter a ticket code or M-Pesa receipt number.', 'danger');
-                return;
-            }
-
-            // Show loading state
-            verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
-            verifyBtn.disabled = true;
-
-            // Make AJAX request to verify ticket
-            fetch('{% url "events:verify_ticket_from_event" event.id %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    ticket_code: ticketCode
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    showVerificationResult(`
-                        <div class="alert alert-success">
-                            <h5 class="alert-heading">Ticket Verified!</h5>
-                            <p class="mb-1"><strong>Event:</strong> ${data.ticket.event_title}</p>
-                            <p class="mb-1"><strong>Customer:</strong> ${data.ticket.customer_name}</p>
-                            <p class="mb-1"><strong>Ticket Type:</strong> ${data.ticket.ticket_type}</p>
-                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success">${data.ticket.payment_status}</span></p>
-                            <p class="mb-0"><strong>M-Pesa Receipt:</strong> ${data.ticket.mpesa_receipt || 'N/A'}</p>
-                        </div>
-                    `, 'success');
-                } else {
-                    showVerificationResult(data.message, 'danger');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showVerificationResult('An error occurred while verifying the ticket. Please try again.', 'danger');
-            })
-            .finally(() => {
-                // Restore button
-                verifyBtn.innerHTML = 'Verify';
-                verifyBtn.disabled = false;
-            });
-        });
-    }
-
-    function showVerificationResult(message, type) {
-        verifyResult.innerHTML = message;
-        verifyResult.style.display = 'block';
-
-        // Scroll to results
-        verifyResult.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Allow Enter key to trigger verification
-    verifyInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            verifyBtn.click();
-        }
-    });
-});
-</script>
 {% endblock %}
