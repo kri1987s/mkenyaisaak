@@ -55,21 +55,8 @@
 
                 <div class="card bg-light border-0 p-4">
                     <h3 class="h4 fw-bold mb-3">Get Tickets</h3>
-                    
-                    {% if event.payment_till_number %}
-                        <div class="alert alert-success border-0 shadow-sm mb-4">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="badge bg-success me-2">M-PESA</span>
-                                <h5 class="alert-heading fw-bold mb-0">Pay to Till Number</h5>
-                            </div>
-                            <div class="display-6 fw-bold text-center my-3">{{ event.payment_till_number }}</div>
-                            <p class="mb-0 small text-center text-muted">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Select number of tickets, click "Buy Ticket Now", then pay via your phone's M-Pesa menu when prompted.
-                                After paying, wait for the M-Pesa SMS confirmation. <strong>That SMS is your ticket.</strong>
-                            </p>
-                        </div>
-                    {% endif %}
+
+                    <p class="mb-3">Select ticket type and quantity on the next page, then complete payment via M-Pesa on your phone.</p>
 
                     <ul class="list-group mb-4">
                         {% for ticket in event.ticket_types.all %}
@@ -80,7 +67,7 @@
                         {% endfor %}
                     </ul>
                     <a href="{% url 'events:booking_create' event.id %}" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm mb-3">
-                        <i class="bi bi-ticket-perforated me-2"></i>Buy Ticket Now
+                        <i class="bi bi-ticket-perforated me-2"></i>Get Tickets
                     </a>
 
                     <div class="text-center">
