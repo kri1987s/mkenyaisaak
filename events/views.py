@@ -24,11 +24,21 @@ class EventDetailView(DetailView):
     template_name = 'events/event_detail.html'
     context_object_name = 'event'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_url'] = self.request.build_absolute_uri()
+        return context
+
 class BookingCreateView(View):
     def get(self, request, event_id):
         event = get_object_or_404(Event, pk=event_id)
         form = BookingForm(event=event)
-        return render(request, 'events/booking_form.html', {'event': event, 'form': form})
+        context = {
+            'event': event,
+            'form': form,
+            'current_url': request.build_absolute_uri(),
+        }
+        return render(request, 'events/booking_form.html', context)
 
     def post(self, request, event_id):
         event = get_object_or_404(Event, pk=event_id)
@@ -112,7 +122,11 @@ class BookingCreateView(View):
 
 def booking_confirmation(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
-    return render(request, 'events/booking_confirmation.html', {'booking': booking})
+    context = {
+        'booking': booking,
+        'current_url': request.build_absolute_uri(),
+    }
+    return render(request, 'events/booking_confirmation.html', context)
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -164,5 +178,6 @@ def performance_registration(request, event_id):
         'event': event,
         'form': form,
         'performances': performances,
+        'current_url': request.build_absolute_uri(),
     }
     return render(request, 'events/performance_registration.html', context)

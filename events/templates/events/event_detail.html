@@ -3,9 +3,11 @@
 {% block title %}{{ event.title }} - Mkenya Isaak 7 Million Event{% endblock %}
 {% block meta_description %}{{ event.description|truncatewords:30 }} - Get your tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}. Join Mkenya Isaak 7 Million for an unforgettable experience.{% endblock %}
 {% block meta_keywords %}{{ event.title }}, {{ event.venue }}, {{ event.date|date:"Y" }}, event, comedy, tickets, Mkenya Isaak 7 Million, Kenya events{% endblock %}
+{% block og_url %}{{ current_url }}{% endblock %}
 {% block og_title %}{{ event.title }} - Mkenya Isaak 7 Million Event{% endblock %}
 {% block og_description %}{{ event.description|truncatewords:30 }} - Get your tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}.{% endblock %}
 {% block og_image %}{{ event.poster.url|default:'/media/mkenya_isaak_face.jpg' }}{% endblock %}
+{% block twitter_url %}{{ current_url }}{% endblock %}
 {% block twitter_title %}{{ event.title }} - Mkenya Isaak 7 Million Event{% endblock %}
 {% block twitter_description %}{{ event.description|truncatewords:30 }} - Get your tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}.{% endblock %}
 {% block twitter_image %}{{ event.poster.url|default:'/media/mkenya_isaak_face.jpg' }}{% endblock %}

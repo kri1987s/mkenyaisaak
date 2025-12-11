@@ -3,8 +3,10 @@
 {% block title %}Book Tickets: {{ event.title }} - Mkenya Isaak 7 Million{% endblock %}
 {% block meta_description %}Book tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}. Secure your seats for this amazing comedy show with Mkenya Isaak 7 Million.{% endblock %}
 {% block meta_keywords %}{{ event.title }}, ticket booking, {{ event.venue }}, {{ event.date|date:"Y" }}, comedy tickets, Mkenya Isaak 7 Million, Kenya events{% endblock %}
+{% block og_url %}{{ current_url }}{% endblock %}
 {% block og_title %}Book Tickets: {{ event.title }} - Mkenya Isaak 7 Million{% endblock %}
 {% block og_description %}Book tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}. Secure your seats for this amazing comedy show with Mkenya Isaak 7 Million.{% endblock %}
+{% block twitter_url %}{{ current_url }}{% endblock %}
 {% block twitter_title %}Book Tickets: {{ event.title }} - Mkenya Isaak 7 Million{% endblock %}
 {% block twitter_description %}Book tickets for {{ event.title }} happening on {{ event.date|date:"F j, Y" }} at {{ event.venue }}. Secure your seats for this amazing comedy show with Mkenya Isaak 7 Million.{% endblock %}
 
