@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.http import HttpResponse
-from .models import Event, TicketType, Booking, Ticket
+from .models import Event, TicketType, Booking, Ticket, Performance
 import csv
 
 class TicketTypeInline(admin.TabularInline):
@@ -227,3 +227,10 @@ class TicketAdmin(admin.ModelAdmin):
 
         return response
     export_tickets_csv.short_description = "Export selected tickets as CSV"
+
+@admin.register(Performance)
+class PerformanceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'event', 'category', 'number_of_performers', 'phone_number', 'created_at')
+    list_filter = ('event', 'category')
+    search_fields = ('name', 'phone_number')
+    readonly_fields = ('created_at', 'updated_at')

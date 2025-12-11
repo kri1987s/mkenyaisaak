@@ -26,6 +26,7 @@ urlpatterns = [
     path('events/', include('events.urls')),
     path('socials/', include('socials.urls')),
     path('mpesa/', include('mpesa.urls')),
+    path('users/', include('users.urls')),
 ]
 
 if settings.DEBUG:

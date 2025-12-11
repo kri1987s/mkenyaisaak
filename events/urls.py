@@ -29,4 +29,6 @@ urlpatterns = [
     path('api/payment-status-ref/', views_status.check_payment_status_by_reference, name='check_payment_status_by_reference'),
     path('api/payment-status-receipt/', views_status.check_payment_status_by_receipt, name='check_payment_status_by_receipt'),
     path('api/payment-status-phone/', views_status.check_payment_status_by_phone, name='check_payment_status_by_phone'),
+    
+    path('<int:event_id>/register-performance/', views.performance_registration, name='performance_registration'),
 ]

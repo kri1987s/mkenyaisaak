@@ -164,3 +164,8 @@ else:
     MPESA_SHORTCODE = config('MPESA_SHORTCODE_SANDBOX')
     MPESA_TILL_NUMBER = config('MPESA_TILL_NUMBER_SANDBOX', default=None)
     MPESA_BASE_URL = 'https://sandbox.safaricom.co.ke'
+
+# Authentication Settings
+LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

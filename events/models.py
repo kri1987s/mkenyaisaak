@@ -84,3 +84,24 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket {self.ticket_code}"
+
+
+class Performance(models.Model):
+    CATEGORY_CHOICES = [
+        ('DANCE', 'Dance'),
+        ('COMEDY', 'Comedy'),
+        ('SONG', 'Song'),
+        ('OTHER', 'Other'),
+    ]
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='performances')
+    name = models.CharField(max_length=200, help_text="Name of the group or individual artist")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    number_of_performers = models.PositiveIntegerField()
+    phone_number = models.CharField(max_length=20)
+    notes = models.TextField(blank=True, null=True, help_text="Any additional notes or requirements for the performance.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.get_category_display()} at {self.event.title}"

@@ -37,3 +37,18 @@ class BookingForm(forms.Form):
             raise forms.ValidationError("Phone number is required.")
 
         return cleaned_data
+
+from .models import Performance
+
+class PerformanceForm(forms.ModelForm):
+    class Meta:
+        model = Performance
+        fields = ['event', 'name', 'category', 'number_of_performers', 'phone_number', 'notes']
+        widgets = {
+            'event': forms.HiddenInput(), # Event will be pre-filled by the view
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Group or Artist Name'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'number_of_performers': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 0712345678'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Any special requests, technical needs, or other important information?'}),
+        }

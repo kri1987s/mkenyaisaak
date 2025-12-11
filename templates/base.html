@@ -125,10 +125,16 @@
                     <p class="mb-0 small">Payment: M-Pesa Till Number 5692342 (Nafeel Kenya)</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <div>
-                        <a href="https://web.facebook.com/seven7miIlion/" target="_blank" class="text-white me-4 fs-4 hover-scale"><i class="fab fa-facebook"></i></a>
-                        <a href="https://www.tiktok.com/@mkenyaisaak" target="_blank" class="text-white me-4 fs-4 hover-scale"><i class="fab fa-tiktok"></i></a>
-                        <a href="https://www.instagram.com/mkenyaisaak/" target="_blank" class="text-white me-4 fs-4 hover-scale"><i class="fab fa-instagram"></i></a>
+                    <div class="d-flex justify-content-end align-items-center mb-2">
+                        {% if user.is_authenticated %}
+                            <span class="text-white small me-2">Hello, {{ user.username }}</span>
+                            <a class="text-white small me-4" href="{% url 'users:logout' %}">Logout</a>
+                        {% else %}
+                            <a class="text-white small me-4" href="{% url 'users:login' %}">Login</a>
+                        {% endif %}
+                        <a href="https://web.facebook.com/seven7miIlion/" target="_blank" class="text-white me-2 fs-4 hover-scale"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.tiktok.com/@mkenyaisaak" target="_blank" class="text-white me-2 fs-4 hover-scale"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.instagram.com/mkenyaisaak/" target="_blank" class="text-white me-2 fs-4 hover-scale"><i class="fab fa-instagram"></i></a>
                         <a href="https://www.youtube.com/@mkenyaisaak" target="_blank" class="text-white fs-4 hover-scale"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>

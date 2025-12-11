@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .models import Event, Booking, Ticket, TicketType
-from .forms import BookingForm
+from .forms import BookingForm, PerformanceForm
 from mpesa.utils import MpesaClient
 from .utils import send_ticket_confirmation_email
 import uuid
@@ -141,3 +141,28 @@ def send_receipt_email(request, booking_id):
         import logging
         logging.exception(f"Failed to send email receipt to {email} for booking {booking_id}")
         return JsonResponse({'success': False, 'message': f'Failed to send email: {str(e)}'})
+
+
+def performance_registration(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    performances = event.performances.all().order_by('name')
+
+    if request.method == 'POST':
+        form = PerformanceForm(request.POST)
+        if form.is_valid():
+            performance = form.save(commit=False)
+            performance.event = event
+            performance.save()
+            messages.success(request, 'Performance registration submitted successfully!')
+            return redirect('events:performance_registration', event_id=event.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PerformanceForm(initial={'event': event})
+
+    context = {
+        'event': event,
+        'form': form,
+        'performances': performances,
+    }
+    return render(request, 'events/performance_registration.html', context)
