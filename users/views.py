@@ -19,6 +19,11 @@ class CustomPasswordResetView(PasswordResetView):
     subject_template_name = 'users/password_reset_subject.txt'
     success_url = reverse_lazy('users:password_reset_done')
 
+    def form_valid(self, form):
+        import logging
+        logging.info("CustomPasswordResetView.form_valid called - this confirms our custom view is being used")
+        return super().form_valid(form)
+
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         """
