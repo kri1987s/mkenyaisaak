@@ -8,24 +8,24 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/media/mkenya_isaak_face.jpg">
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.">
-    <meta name="keywords" content="Mkenya Isaak 7 Million, Kitale, Comedian, Kenya Comedy, Laugh, Events, Entertainment, Comedy Shows">
+    <meta name="description" content="{% block meta_description %}Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}Mkenya Isaak 7 Million, Kitale, Comedian, Kenya Comedy, Laugh, Events, Entertainment, Comedy Shows{% endblock %}">
     <meta name="author" content="Mkenya Isaak 7 Million">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://mkenyaisaak.com">
-    <meta property="og:title" content="Mkenya Isaak 7 Million - Kitale Comedian">
-    <meta property="og:description" content="Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.">
-    <meta property="og:image" content="/media/mkenya_isaak_face.jpg">
+    <meta property="og:url" content="{% block og_url %}https://mkenyaisaak.com{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% block title %}Mkenya Isaak 7 Million - Kitale Comedian{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% block meta_description %}Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.{% endblock %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}/media/mkenya_isaak_face.jpg{% endblock %}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://mkenyaisaak.com">
-    <meta property="twitter:title" content="Mkenya Isaak 7 Million - Kitale Comedian">
-    <meta property="twitter:description" content="Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.">
-    <meta property="twitter:image" content="/media/mkenya_isaak_face.jpg">
+    <meta property="twitter:url" content="{% block twitter_url %}https://mkenyaisaak.com{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}{% block title %}Mkenya Isaak 7 Million - Kitale Comedian{% endblock %}{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}{% block meta_description %}Official website of Mkenya Isaak 7 Million - The famous Kitale comedian bringing laughter and entertainment. Experience the best comedy shows and events.{% endblock %}{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}/media/mkenya_isaak_face.jpg{% endblock %}">
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://mkenyaisaak.com">

@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
 {% block title %}Booking Confirmation - Mkenya Isaak 7 Million{% endblock %}
+{% block meta_description %}Your booking confirmation for {{ booking.tickets.first.ticket_type.event.title }}. Complete your payment to secure your tickets for this exciting event.{% endblock %}
+{% block meta_keywords %}booking confirmation, {{ booking.tickets.first.ticket_type.event.title }}, event booking, ticket payment, Mkenya Isaak 7 Million{% endblock %}
+{% block og_title %}Booking Confirmation - Mkenya Isaak 7 Million{% endblock %}
+{% block og_description %}Your booking confirmation for {{ booking.tickets.first.ticket_type.event.title }}. Complete your payment to secure your tickets for this exciting event.{% endblock %}
+{% block twitter_title %}Booking Confirmation - Mkenya Isaak 7 Million{% endblock %}
+{% block twitter_description %}Your booking confirmation for {{ booking.tickets.first.ticket_type.event.title }}. Complete your payment to secure your tickets for this exciting event.{% endblock %}
 
 {% block content %}
 <div class="container py-5">

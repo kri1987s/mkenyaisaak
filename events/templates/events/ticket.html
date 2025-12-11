@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
 {% block title %}Ticket: {{ booking.tickets.first.ticket_code }}{% endblock %}
+{% block meta_description %}Your ticket for {{ booking.tickets.first.ticket_type.event.title }} on {{ booking.tickets.first.ticket_type.event.date|date:"F j, Y" }} at {{ booking.tickets.first.ticket_type.event.venue }}. Ticket code: {{ booking.tickets.first.ticket_code }}.{% endblock %}
+{% block meta_keywords %}ticket, {{ booking.tickets.first.ticket_type.event.title }}, {{ booking.tickets.first.ticket_type.event.venue }}, {{ booking.tickets.first.ticket_type.event.date|date:"Y" }}, event ticket, verification{% endblock %}
+{% block og_title %}Ticket: {{ booking.tickets.first.ticket_code }} - {{ booking.tickets.first.ticket_type.event.title }}{% endblock %}
+{% block og_description %}Your ticket for {{ booking.tickets.first.ticket_type.event.title }} on {{ booking.tickets.first.ticket_type.event.date|date:"F j, Y" }} at {{ booking.tickets.first.ticket_type.event.venue }}.{% endblock %}
+{% block twitter_title %}Ticket: {{ booking.tickets.first.ticket_code }} - {{ booking.tickets.first.ticket_type.event.title }}{% endblock %}
+{% block twitter_description %}Your ticket for {{ booking.tickets.first.ticket_type.event.title }} on {{ booking.tickets.first.ticket_type.event.date|date:"F j, Y" }} at {{ booking.tickets.first.ticket_type.event.venue }}.{% endblock %}
 
 {% block content %}
 <div class="container py-5">
