@@ -28,6 +28,7 @@ class CustomPasswordResetView(PasswordResetView):
         from django.core.mail import send_mail
         from django.template.loader import render_to_string
         from django.utils.html import strip_tags
+        import logging
 
         # Render the subject
         subject = render_to_string(subject_template_name, context)
@@ -38,6 +39,10 @@ class CustomPasswordResetView(PasswordResetView):
 
         # Create plain text version by stripping HTML tags
         text_email = strip_tags(html_email)
+
+        # Log that our custom method is being called
+        logging.info(f"Custom send_mail called for password reset to: {to_email}")
+        logging.info(f"HTML email contains HTML tags: {'<html>' in html_email or '<div' in html_email or '<p>' in html_email}")
 
         # Use Django's send_mail function with html_message parameter
         # This follows the same pattern as the events app
