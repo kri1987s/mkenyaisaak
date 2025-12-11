@@ -25,17 +25,18 @@ class CustomPasswordResetView(PasswordResetView):
         print("DEBUG: CustomPasswordResetView.form_valid is running!")
         logging.info("CustomPasswordResetView.form_valid: Starting execution")
 
-        # Get the email from the form
-        email = form.cleaned_data['email']
-        logging.info(f"CustomPasswordResetView.form_valid: About to call parent form_valid for email: {email}")
+        # Don't try to access form data here that might cause issues
+        # Just call the parent which will handle the email sending properly
+        logging.info("CustomPasswordResetView.form_valid: Calling parent form_valid")
 
-        # Call the parent implementation which should call our send_mail method
         try:
             result = super().form_valid(form)
             logging.info("CustomPasswordResetView.form_valid: Parent method completed successfully")
             return result
         except Exception as e:
             logging.error(f"CustomPasswordResetView.form_valid: Error in parent implementation: {str(e)}")
+            # Print the error to console as well for visibility
+            print(f"ERROR in form_valid: {str(e)}")
             raise
 
     def send_mail(self, subject_template_name, email_template_name,
