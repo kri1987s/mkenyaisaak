@@ -21,59 +21,68 @@ class CustomPasswordResetView(PasswordResetView):
 
     def form_valid(self, form):
         import logging
-        # Add a simple print as well as logging to make sure this runs
-        print("DEBUG: CustomPasswordResetView.form_valid is running!")
-        logging.info("CustomPasswordResetView.form_valid: Starting execution")
-
-        # Don't try to access form data here that might cause issues
-        # Just call the parent which will handle the email sending properly
-        logging.info("CustomPasswordResetView.form_valid: Calling parent form_valid")
-
-        try:
-            result = super().form_valid(form)
-            logging.info("CustomPasswordResetView.form_valid: Parent method completed successfully")
-            return result
-        except Exception as e:
-            logging.error(f"CustomPasswordResetView.form_valid: Error in parent implementation: {str(e)}")
-            # Print the error to console as well for visibility
-            print(f"ERROR in form_valid: {str(e)}")
-            raise
-
-    def send_mail(self, subject_template_name, email_template_name,
-                  context, from_email, to_email, html_email_template_name=None):
-        """
-        Send a password reset email using Django's send_mail function.
-        This follows the same pattern as other working email functionality in the project.
-        """
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
         from django.core.mail import send_mail
         from django.template.loader import render_to_string
         from django.utils.html import strip_tags
-        import logging
+        import sys
 
-        # Render the subject
-        subject = render_to_string(subject_template_name, context)
-        subject = ''.join(subject.splitlines()).strip()
+        print("DEBUG: CustomPasswordResetView.form_valid is running!")
+        logging.info("CustomPasswordResetView.form_valid: Starting execution")
 
-        # Render HTML email content
-        html_email = render_to_string(email_template_name, context)
+        # Get the email from the form
+        email = form.cleaned_data['email']
+        logging.info(f"CustomPasswordResetView.form_valid: Processing email: {email}")
 
-        # Create plain text version by stripping HTML tags
-        text_email = strip_tags(html_email)
+        # Get the associated users
+        User = get_user_model()
+        active_users = User._default_manager.filter(email__iexact=email, is_active=True)
 
-        # Log that our custom method is being called
-        logging.info(f"CustomPasswordResetView.send_mail called for: {to_email}")
-        logging.info(f"HTML email content preview: {html_email[:100]}...")
+        for user in active_users:
+            # Create context for the email template
+            context = {
+                'email': email,
+                'user': user,
+                'domain': self.request.get_host(),
+                'site_name': 'Mkenya Isaak 7 Million',
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+                'protocol': 'https' if self.request.is_secure() else 'http',
+            }
 
-        # Use Django's send_mail function with html_message parameter
-        # This follows the same pattern as the events app
-        send_mail(
-            subject=subject,
-            message=text_email,  # Plain text version
-            from_email=from_email,
-            recipient_list=[to_email],
-            html_message=html_email,  # HTML version
-            fail_silently=False,
-        )
+            # Render subject
+            subject = render_to_string(self.subject_template_name, context)
+            subject = ''.join(subject.splitlines()).strip()
+
+            # Render HTML email content
+            html_email = render_to_string(self.email_template_name, context)
+
+            # Create plain text version by stripping HTML tags
+            text_email = strip_tags(html_email)
+
+            logging.info(f"CustomPasswordResetView: Sending HTML email to {email}")
+            logging.info(f"HTML email sample: {html_email[:100]}...")
+
+            # Send the email using the same approach as events app
+            from django.conf import settings
+            from_email_address = getattr(settings, 'DEFAULT_FROM_EMAIL', 'welcome@mkenyaisaak.co.ke')
+
+            send_mail(
+                subject=subject,
+                message=text_email,  # Plain text version
+                from_email=from_email_address,
+                recipient_list=[email],
+                html_message=html_email,  # HTML version
+                fail_silently=False,
+            )
+
+            logging.info(f"CustomPasswordResetView: Email sent to {email}")
+
+        # Return the success response without calling parent (to avoid duplicate emails)
+        return super().form_valid(form)
 
 class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
