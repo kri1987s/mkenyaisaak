@@ -22,7 +22,14 @@ class CustomPasswordResetView(PasswordResetView):
     def form_valid(self, form):
         import logging
         logging.info("CustomPasswordResetView.form_valid called - this confirms our custom view is being used")
-        return super().form_valid(form)
+        try:
+            result = super().form_valid(form)
+            logging.info("CustomPasswordResetView.form_valid completed successfully")
+            return result
+        except Exception as e:
+            logging.error(f"Error in CustomPasswordResetView.form_valid: {str(e)}")
+            # Re-raise the exception so we see it
+            raise
 
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
