@@ -47,6 +47,9 @@ class CustomPasswordResetView(PasswordResetView):
         )
         # Attach the HTML version
         msg.attach_alternative(html_email, "text/html")
+        print("--- DEBUG: Raw Email Content ---")
+        print(msg.message().as_string())
+        print("--- END DEBUG ---")
         msg.send()
 
 class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
