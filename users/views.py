@@ -1,9 +1,14 @@
-from django.shortcuts import render
-from django.contrib.auth import views as auth_views
+from django.shortcuts import render, redirect
+from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 from events.models import Event
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib import messages
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'users/password_reset_form.html'
@@ -13,6 +18,21 @@ class CustomPasswordResetView(PasswordResetView):
 
 class PasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the 3 most recent events
+        context['recent_events'] = Event.objects.filter(is_active=True).order_by('-date')[:3]
+        return context
+
+class CustomLoginView(auth_views.LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return redirect('core:home')  # Redirect to homepage if already logged in
+        return super().dispatch(request, *args, **kwargs)
+
+class CustomLogoutView(auth_views.LogoutView):
+    template_name = 'users/logged_out.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
