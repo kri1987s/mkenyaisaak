@@ -19,6 +19,23 @@ class CustomPasswordResetView(PasswordResetView):
     subject_template_name = 'users/password_reset_subject.txt'
     success_url = reverse_lazy('users:password_reset_done')
 
+    def form_valid(self, form):
+        import logging
+        logging.info("CustomPasswordResetView.form_valid: Starting execution")
+
+        # Get the email from the form
+        email = form.cleaned_data['email']
+        logging.info(f"CustomPasswordResetView.form_valid: About to call parent form_valid for email: {email}")
+
+        # Call the parent implementation which should call our send_mail method
+        try:
+            result = super().form_valid(form)
+            logging.info("CustomPasswordResetView.form_valid: Parent method completed successfully")
+            return result
+        except Exception as e:
+            logging.error(f"CustomPasswordResetView.form_valid: Error in parent implementation: {str(e)}")
+            raise
+
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         """
