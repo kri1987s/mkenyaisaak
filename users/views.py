@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views, login
-from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 from events.models import Event
@@ -9,6 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib import messages
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.mail import EmailMultiAlternatives
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'users/password_reset_form.html'
@@ -16,7 +19,37 @@ class CustomPasswordResetView(PasswordResetView):
     subject_template_name = 'users/password_reset_subject.txt'
     success_url = reverse_lazy('users:password_reset_done')
 
-class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        """
+        Send a django.core.mail.EmailMultiAlternatives to `to_email`.
+        """
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+
+        # Render the subject
+        subject = render_to_string(subject_template_name, context)
+        subject = ''.join(subject.splitlines()).strip()
+
+        # Render HTML email content
+        html_email = render_to_string(email_template_name, context)
+
+        # Create plain text version by stripping HTML tags
+        from django.utils.html import strip_tags
+        text_email = strip_tags(html_email)
+
+        # Create email with plain text as the main body and HTML as alternative
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_email,  # This is the plain text version
+            from_email=from_email,
+            to=[to_email],
+        )
+        # Attach the HTML version
+        msg.attach_alternative(html_email, "text/html")
+        msg.send()
+
+class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
 
     def get_context_data(self, **kwargs):
