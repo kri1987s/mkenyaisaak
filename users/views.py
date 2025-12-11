@@ -22,10 +22,12 @@ class CustomPasswordResetView(PasswordResetView):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         """
-        Send a django.core.mail.EmailMultiAlternatives to `to_email`.
+        Send a password reset email using Django's send_mail function.
+        This follows the same pattern as other working email functionality in the project.
         """
-        from django.core.mail import EmailMultiAlternatives
+        from django.core.mail import send_mail
         from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
 
         # Render the subject
         subject = render_to_string(subject_template_name, context)
@@ -35,22 +37,18 @@ class CustomPasswordResetView(PasswordResetView):
         html_email = render_to_string(email_template_name, context)
 
         # Create plain text version by stripping HTML tags
-        from django.utils.html import strip_tags
         text_email = strip_tags(html_email)
 
-        # Create email with plain text as the main body and HTML as alternative
-        msg = EmailMultiAlternatives(
+        # Use Django's send_mail function with html_message parameter
+        # This follows the same pattern as the events app
+        send_mail(
             subject=subject,
-            body=text_email,  # This is the plain text version
+            message=text_email,  # Plain text version
             from_email=from_email,
-            to=[to_email],
+            recipient_list=[to_email],
+            html_message=html_email,  # HTML version
+            fail_silently=False,
         )
-        # Attach the HTML version
-        msg.attach_alternative(html_email, "text/html")
-        print("--- DEBUG: Raw Email Content ---")
-        print(msg.message().as_string())
-        print("--- END DEBUG ---")
-        msg.send()
 
 class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
