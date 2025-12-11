@@ -21,6 +21,8 @@ class CustomPasswordResetView(PasswordResetView):
 
     def form_valid(self, form):
         import logging
+        # Add a simple print as well as logging to make sure this runs
+        print("DEBUG: CustomPasswordResetView.form_valid is running!")
         logging.info("CustomPasswordResetView.form_valid: Starting execution")
 
         # Get the email from the form
