@@ -19,11 +19,41 @@ class CustomPasswordResetView(PasswordResetView):
     subject_template_name = 'users/password_reset_subject.txt'
     success_url = reverse_lazy('users:password_reset_done')
 
-    def form_valid(self, form):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        """
+        Send a password reset email using Django's send_mail function.
+        This follows the same pattern as other working email functionality in the project.
+        """
+        from django.core.mail import send_mail
+        from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
         import logging
-        logging.info("CustomPasswordResetView.form_valid called - this confirms our custom view is being used")
-        # Intentionally cause an error to verify if this view is being used
-        raise Exception("CustomPasswordResetView is working and has been called!")
+
+        # Render the subject
+        subject = render_to_string(subject_template_name, context)
+        subject = ''.join(subject.splitlines()).strip()
+
+        # Render HTML email content
+        html_email = render_to_string(email_template_name, context)
+
+        # Create plain text version by stripping HTML tags
+        text_email = strip_tags(html_email)
+
+        # Log that our custom method is being called
+        logging.info(f"CustomPasswordResetView.send_mail called for: {to_email}")
+        logging.info(f"HTML email content preview: {html_email[:100]}...")
+
+        # Use Django's send_mail function with html_message parameter
+        # This follows the same pattern as the events app
+        send_mail(
+            subject=subject,
+            message=text_email,  # Plain text version
+            from_email=from_email,
+            recipient_list=[to_email],
+            html_message=html_email,  # HTML version
+            fail_silently=False,
+        )
 
 class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
