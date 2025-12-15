@@ -174,10 +174,15 @@ def performance_registration(request, event_id):
     else:
         form = PerformanceForm(initial={'event': event})
 
+    # Get unique phone numbers
+    phone_numbers = performances.values_list('phone_number', flat=True)
+    unique_phone_numbers = sorted(list(set(phone_numbers)))
+
     context = {
         'event': event,
         'form': form,
         'performances': performances,
+        'unique_phone_numbers': unique_phone_numbers,
         'current_url': request.build_absolute_uri(),
     }
     return render(request, 'events/performance_registration.html', context)
