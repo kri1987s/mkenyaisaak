@@ -1,10 +1,10 @@
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, ListView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Q
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from core.mixins import StaffRequiredMixin
-from .models import Event, Ticket
+from .models import Event, Ticket, Booking
 
 class StaffDashboardView(StaffRequiredMixin, TemplateView):
     template_name = 'events/staff/dashboard.html'
@@ -46,3 +46,11 @@ def resend_ticket_email(request, ticket_id):
     
     messages.success(request, f"Email resent to {ticket.booking.customer_email}")
     return redirect('events:staff_search')
+
+class StaffBookingsView(StaffRequiredMixin, ListView):
+    model = Booking
+    template_name = 'events/staff/bookings.html'
+    context_object_name = 'bookings'
+
+    def get_queryset(self):
+        return Booking.objects.filter(payment_status='PAID').order_by('-created_at')

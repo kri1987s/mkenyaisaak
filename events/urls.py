@@ -16,6 +16,7 @@ urlpatterns = [
 
     # Staff Views
     path('staff/', staff_views.StaffDashboardView.as_view(), name='staff_dashboard'),
+    path('staff/bookings/', staff_views.StaffBookingsView.as_view(), name='staff_bookings'),
     path('staff/event/<int:pk>/attendees/', staff_views.EventAttendeeListView.as_view(), name='staff_attendees'),
     path('staff/scanner/', staff_views.StaffScannerView.as_view(), name='staff_scanner'),
     path('staff/search/', staff_views.TicketSearchView.as_view(), name='staff_search'),

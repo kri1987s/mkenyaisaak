@@ -128,6 +128,16 @@
                     <div class="d-flex justify-content-end align-items-center mb-2">
                         {% if user.is_authenticated %}
                             <span class="text-white small me-2">Hello, {{ user.username }}</span>
+                            {% if user.is_staff %}
+                            <div class="dropdown d-inline">
+                                <a class="btn btn-link text-white small me-2 p-0 text-decoration-none border-0 bg-transparent dropdown-toggle" href="#" role="button" id="staffMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Dashboard
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="staffMenuLink">
+                                    <li><a class="dropdown-item" href="{% url 'events:staff_bookings' %}">Bookings</a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
                             <form method="post" action="{% url 'users:logout' %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-link text-white small me-4 p-0 text-decoration-none border-0 bg-transparent">Logout</button>
